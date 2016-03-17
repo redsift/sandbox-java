@@ -1,0 +1,36 @@
+{
+  "dag": {
+    "nodes":[
+		{
+			"#": "Test Node 1",
+			"implementation": {
+				"java": "server/Node1.java"
+			}
+		},
+		{
+			"#": "Test Node deepak 2",
+			"implementation": {
+				"java": "server/deepak/Node2.java"
+			}
+		},
+		{
+			"#": "Missing Node",
+			"implementation": {
+				"java": "Node-missing.java"  
+			}
+		},
+		{
+			"#": "Test Node 2",
+			"implementation": {
+				"java": "server-alt/Node2.java"  
+			}
+		},
+		{
+			"#": "Test Node 3",
+			"implementation": {
+				"java": "server-plain/Node3.java"
+			}
+		}			
+	]
+  }
+}
