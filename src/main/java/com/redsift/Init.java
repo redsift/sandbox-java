@@ -3,8 +3,6 @@ package com.redsift;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
 
 public class Init {
     public static ObjectMapper mapper = new ObjectMapper();

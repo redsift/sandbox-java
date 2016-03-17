@@ -9,16 +9,16 @@ import java.util.List;
 public class Install {
 
     public static void main(String args[]) throws Exception {
- 
+
         System.out.println("Install: " + Arrays.toString(args));
 
         Init init = new Init(args);
 
-        for (String n: args) {
+        for (String n : args) {
             int i = Integer.parseInt(n);
+            System.out.println("");
             System.out.println("n: " + n + " i: " + i);
             SiftJSON.Dag.Node node = init.sift.dag.nodes[i];
-            System.out.println(node);
 
             if (node.implementation == null || node.implementation.java == null) {
                 throw new Exception("Requested to install a non-Java node at index " + n);
@@ -26,6 +26,10 @@ public class Install {
 
             System.out.println("Installing node: " + node.description + " : " + node.implementation.java);
             SiftJSON.Dag.Node.Implementation.JavaFile javaFile = node.implementation.javaFile();
+            if (javaFile.file.contains(".jar")) {
+                System.out.println("Already installed, skipping.");
+                continue;
+            }
 
             File implFile = new File(init.SIFT_ROOT, javaFile.file);
             if (!implFile.exists()) {
@@ -44,8 +48,8 @@ public class Install {
 
             // JARify. jar cvf Node.jar Node.class
             List<String> jarCmds = node.implementation.jarCommand(javaFile);
-            String workDir = jarCmds.get(jarCmds.size()-1);
-            jarCmds.remove(jarCmds.size()-1);
+            String workDir = jarCmds.get(jarCmds.size() - 1);
+            jarCmds.remove(jarCmds.size() - 1);
             err = null;
             err = executeCommand(jarCmds.toArray(new String[0]), new File(init.SIFT_ROOT, workDir));
             if (err != null && err.length() > 0) {
@@ -53,7 +57,12 @@ public class Install {
             }
 
             System.out.println("JARred node");
+
+            node.implementation.java = javaFile.file.replace(".java", ".jar") + ";" + javaFile.className;
+            System.out.println("Rewrote java file: " + node.implementation.java);
         }
+
+        Init.mapper.writeValue(new File(init.SIFT_ROOT, init.SIFT_JSON), init.sift);
     }
 
     private static String executeCommand(String[] cmdarray, File dir) {
@@ -68,7 +77,7 @@ public class Install {
                     new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
             String line = "";
-            while ((line = reader.readLine())!= null) {
+            while ((line = reader.readLine()) != null) {
                 output.append(line + "\n");
             }
 

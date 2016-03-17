@@ -1,46 +1,52 @@
 package com.redsift;
 
-import java.lang.reflect.InvocationTargetException;
+import java.io.File;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 
 public class Bootstrap {
 
-    public static void main(String args[]) throws MalformedURLException, ClassNotFoundException, NoSuchMethodException,
-            IllegalAccessException, InvocationTargetException {
- 
+    public static void main(String args[]) throws Exception {
+
         System.out.println("Bootstrap: " + Arrays.toString(args));
 
-        String HOME = "file:///Users/deepakp/workspace/containers/sandbox-java/test/server/Node1.jar";
+        Init init = new Init(args);
 
-        // add the classes dir and each jar in lib to a List of URLs.
-        //List urls = new ArrayList();
-        //urls.add(new File(HOME).toURI().toURL());
+        for (String n : args) {
+            int i = Integer.parseInt(n);
+            System.out.println("");
+            System.out.println("n: " + n + " i: " + i);
+            SiftJSON.Dag.Node node = init.sift.dag.nodes[i];
 
-        // feed your URLs to a URLClassLoader!
-        ClassLoader classloader =
-                new URLClassLoader(
-                        new URL[]{
-                                new URL(
-                                        "file:///Users/deepakp/workspace/containers/sandbox-java/test/server/Node1.jar"
-                                )
-                        },
-                        ClassLoader.getSystemClassLoader().getParent());
+            if (node.implementation == null || node.implementation.java == null) {
+                throw new Exception("Requested to run a non-Java node at index " + n);
+            }
 
-        // relative to that classloader, find the main class
-        // you want to bootstrap, which is the first cmd line arg
-        Class mainClass = classloader.loadClass("server.Node1");
-        @SuppressWarnings("unchecked")
-        Method compute = mainClass.getMethod("compute",
-                (Class[]) null);
+            System.out.println("Running node: " + node.description + " : " + node.implementation.java);
+            SiftJSON.Dag.Node.Implementation.JavaFile javaFile = node.implementation.javaFile();
+            if (!javaFile.file.contains(".jar")) {
+                throw new Exception("Node not installed, bailing out!");
+            }
 
-        // well-behaved Java packages work relative to the
-        // context classloader.  Others don't (like commons-logging)
-        Thread.currentThread().setContextClassLoader(classloader);
-        compute.invoke(null);
+            File jarFile = new File(init.SIFT_ROOT, javaFile.file);
+            // feed your URLs to a URLClassLoader!
+            ClassLoader classloader = new URLClassLoader(new URL[]{jarFile.toURI().toURL()},
+                    ClassLoader.getSystemClassLoader().getParent());
+
+            // relative to that classloader, find the main class
+            // you want to bootstrap, which is the first cmd line arg
+            Class mainClass = classloader.loadClass(javaFile.className);
+            @SuppressWarnings("unchecked")
+            Method compute = mainClass.getMethod("compute", (Class[]) null);
+
+            // well-behaved Java packages work relative to the
+            // context classloader.  Others don't (like commons-logging)
+            Thread.currentThread().setContextClassLoader(classloader);
+            compute.invoke(null);
+        }
+        
     }
 
 }

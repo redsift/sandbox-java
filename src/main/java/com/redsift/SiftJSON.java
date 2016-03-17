@@ -22,8 +22,7 @@ public class SiftJSON {
 
                 public String java;
 
-                public Implementation(@JsonProperty("java")String java) {
-                    System.out.println("Init Implementation: " + java);
+                public Implementation(@JsonProperty("java") String java) {
                     this.java = java;
                 }
 
@@ -42,9 +41,6 @@ public class SiftJSON {
                         javaFile.className = className;
                     }
 
-                    System.out.println("file= " + javaFile.file);
-                    System.out.println("className= " + javaFile.className);
-
                     return javaFile;
                 }
 
@@ -56,13 +52,13 @@ public class SiftJSON {
                     String jarFile = javaFile.file.replace(".java", ".jar");
                     String classFile = javaFile.file.replace(".java", ".class");
                     if (javaFile.userSpecified) {
-                        System.out.println("user file="+javaFile.file);
-                        System.out.println("user className="+javaFile.className);
                         workDir = javaFile.file.replace(javaFile.className.replace(".", "/"), "");
                         workDir = workDir.replace(".java", "");
                         jarFile = jarFile.replace(workDir, "");
                         classFile = classFile.replace(workDir, "");
                     }
+                    System.out.println("user file=" + javaFile.file);
+                    System.out.println("user className=" + javaFile.className);
                     args.add(jarFile);
                     args.add(classFile);
                     args.add(workDir);
@@ -76,8 +72,7 @@ public class SiftJSON {
             public String description;
             public Implementation implementation;
 
-            public Node(@JsonProperty("#")String description, @JsonProperty("implementation")Implementation implementation) {
-                System.out.println("Init Node: " + description + " : " + implementation);
+            public Node(@JsonProperty("#") String description, @JsonProperty("implementation") Implementation implementation) {
                 this.description = description;
                 this.implementation = implementation;
             }
@@ -85,8 +80,7 @@ public class SiftJSON {
 
         public Node[] nodes;
 
-        public Dag(@JsonProperty("nodes")Node[] nodes) {
-            System.out.println("Init Dag: " + nodes);
+        public Dag(@JsonProperty("nodes") Node[] nodes) {
             this.nodes = nodes;
         }
     }
