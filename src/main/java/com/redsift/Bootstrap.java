@@ -14,7 +14,7 @@ public class Bootstrap {
  
         System.out.println("Bootstrap: " + Arrays.toString(args));
 
-        String HOME = "file:///Users/deepakp/workspace/containers/sandbox-java/test/server";
+        String HOME = "file:///Users/deepakp/workspace/containers/sandbox-java/test/server/Node1.jar";
 
         // add the classes dir and each jar in lib to a List of URLs.
         //List urls = new ArrayList();
@@ -25,14 +25,14 @@ public class Bootstrap {
                 new URLClassLoader(
                         new URL[]{
                                 new URL(
-                                        "file:///Users/deepakp/workspace/containers/sandbox-java/test/server/"
+                                        "file:///Users/deepakp/workspace/containers/sandbox-java/test/server/Node1.jar"
                                 )
                         },
                         ClassLoader.getSystemClassLoader().getParent());
 
         // relative to that classloader, find the main class
         // you want to bootstrap, which is the first cmd line arg
-        Class mainClass = classloader.loadClass("Node1");
+        Class mainClass = classloader.loadClass("server.Node1");
         @SuppressWarnings("unchecked")
         Method compute = mainClass.getMethod("compute",
                 (Class[]) null);

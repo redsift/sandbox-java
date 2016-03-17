@@ -8,29 +8,41 @@
 			}
 		},
 		{
-			"#": "Test Node deepak 2",
-			"implementation": {
-				"java": "server/deepak/Node2.java"
-			}
-		},
-		{
-			"#": "Missing Node",
-			"implementation": {
-				"java": "Node-missing.java"  
-			}
-		},
-		{
 			"#": "Test Node 2",
 			"implementation": {
-				"java": "server-alt/Node2.java"  
+				"java": "server/Node2.java"
 			}
 		},
 		{
-			"#": "Test Node 3",
+			"#": "Test Node Inner 2",
 			"implementation": {
-				"java": "server-plain/Node3.java"
+				"java": "server/inner/Node2.java"
 			}
-		}			
+		},
+		{
+			"#": "Test Node -Alt 2",
+			"implementation": {
+				"java": "server-alt/Node2.java;Node2"
+			}
+		},
+		{
+			"#": "Test Node -Plain 3",
+			"implementation": {
+				"java": "server-plain/Node3.java;Node3"
+			}
+		},
+		{
+			"#": "Test Node Alt 2",
+			"implementation": {
+				"java": "serveralt/Node2.java;"
+			}
+		},
+		{
+			"#": "Test Node Plain 3",
+			"implementation": {
+				"java": "serverplain/Node3.java"
+			}
+		}
 	]
   }
 }

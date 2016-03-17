@@ -1,8 +1,5 @@
-
 public class Node3 {
- 
-  public static void compute(){ 
-    System.out.println("Node3.java");
-  }
-  
+    public static void compute() {
+        System.out.println("server-plain Node3.java");
+    }
 }
