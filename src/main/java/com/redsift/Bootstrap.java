@@ -12,9 +12,6 @@ public class Bootstrap {
     public static void main(String args[]) throws MalformedURLException, ClassNotFoundException, NoSuchMethodException,
             IllegalAccessException, InvocationTargetException {
  
-    /*
-    Use System.out.println() to print on console.
-    */
         System.out.println("Bootstrap: " + Arrays.toString(args));
 
         String HOME = "file:///Users/deepakp/workspace/containers/sandbox-java/test/server";

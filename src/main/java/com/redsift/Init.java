@@ -3,6 +3,8 @@ package com.redsift;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 public class Init {
     public static ObjectMapper mapper = new ObjectMapper();
@@ -11,6 +13,7 @@ public class Init {
     public String SIFT_JSON;
     public String IPC_ROOT;
     public Boolean DRY;
+    public SiftJSON sift;
 
     public Init(String args[]) throws Exception {
         if (args.length <= 0) {
@@ -43,27 +46,16 @@ public class Init {
             System.out.println("Unit Test Mode");
         }
 
+        SiftJSON sift = mapper.readValue(new File(SIFT_ROOT, SIFT_JSON), SiftJSON.class);
+        if (sift == null || sift.dag == null || sift.dag.nodes == null || sift.dag.nodes.length == 0) {
+            throw new Exception("Sift does not contain any nodes");
+        }
+
         this.nodes = args;
         this.SIFT_ROOT = SIFT_ROOT;
         this.SIFT_JSON = SIFT_JSON;
         this.IPC_ROOT = IPC_ROOT;
         this.DRY = DRY;
+        this.sift = sift;
     }
 }
-/*
-
-var sift = JSON.parse(fs.readFileSync(path.join(SIFT_ROOT, SIFT_JSON), 'utf8'));
-
-if ((sift.dag === undefined) || (sift.dag.nodes === undefined)) {
-    throw new Error('Sift does not contain any nodes');
-}
-
-module.exports = {
-  nodes: nodes,
-  SIFT_ROOT: SIFT_ROOT,
-  SIFT_JSON: SIFT_JSON,
-  IPC_ROOT: IPC_ROOT,
-  DRY: DRY,
-  sift: sift
-};
-*/
