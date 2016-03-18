@@ -10,18 +10,27 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class SiftJSON {
+    public Dag dag;
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Dag {
+        public Node[] nodes;
+
+        public Dag(@JsonProperty("nodes") Node[] nodes) {
+            this.nodes = nodes;
+        }
+
         @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Node {
+            public String description;
+            public Implementation implementation;
+            public Node(@JsonProperty("#") String description, @JsonProperty("implementation") Implementation implementation) {
+                this.description = description;
+                this.implementation = implementation;
+            }
+
             @JsonIgnoreProperties(ignoreUnknown = true)
             public static class Implementation {
-                public static class JavaFile {
-                    public String file;
-                    public String className;
-                    public Boolean userSpecified = false;
-                }
-
                 public String java;
 
                 public Implementation(@JsonProperty("java") String java) {
@@ -69,25 +78,15 @@ class SiftJSON {
                     return args;
                 }
 
+                public static class JavaFile {
+                    public String file;
+                    public String className;
+                    public Boolean userSpecified = false;
+                }
+
             }
-
-            public String description;
-            public Implementation implementation;
-
-            public Node(@JsonProperty("#") String description, @JsonProperty("implementation") Implementation implementation) {
-                this.description = description;
-                this.implementation = implementation;
-            }
-        }
-
-        public Node[] nodes;
-
-        public Dag(@JsonProperty("nodes") Node[] nodes) {
-            this.nodes = nodes;
         }
     }
-
-    public Dag dag;
 }
 
 public class Init {

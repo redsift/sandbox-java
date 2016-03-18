@@ -16,5 +16,15 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.6.3" level="project" />
     <orderEntry type="library" name="Maven: jnanomsg:jnanomsg:0.4.3" level="project" />
     <orderEntry type="library" name="Maven: net.java.dev.jna:jna:4.2.1" level="project" />
+    <orderEntry type="library" name="Maven: org.adrianwalker:multiline-string:0.1.1" level="project" />
+    <orderEntry type="module-library">
+      <library name="Maven: sun.jdk:tools:LATEST">
+        <CLASSES>
+          <root url="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_74.jdk/Contents/Home/lib/tools.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

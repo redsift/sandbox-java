@@ -6,30 +6,42 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 class NodeThread extends Thread {
+    public RepSocket socket;
     private Thread t;
     private String threadName;
     private Method compute;
-    private RepSocket socket;
+    private String addr;
 
-    NodeThread(String name, RepSocket socket, Method compute) {
+    NodeThread(String name, String addr, Method compute) {
         this.threadName = name;
-        this.socket = socket;
+        this.addr = addr;
         this.compute = compute;
         System.out.println("Creating " + threadName);
     }
 
     public void run() {
         System.out.println("Running " + threadName);
+        this.socket = new RepSocket();
+        this.socket.setRecvTimeout(-1);
+        this.socket.setSendTimeout(-1);
+
+        this.socket.connect(this.addr);
+        System.out.println("Connected to " + this.addr);
+
         try {
             while (true) {
-                String req = socket.recvString();
-                System.out.println("Received " + req);
+                System.out.println("00000");
+                byte[] req = socket.recvBytes();
+                System.out.println("132323");
+                Map<String, Object> reqMap = Protocol.fromEncodedMessage(req);
+                System.out.println("64565464");
+                System.out.println("Received " + reqMap.toString());
                 Class<?> retType = compute.getReturnType();
                 long start = System.nanoTime();
                 Object ret = compute.invoke(null);
@@ -39,7 +51,7 @@ class NodeThread extends Thread {
                 diff[0] = Math.floor(t);
                 diff[1] = (t - diff[0]) * Math.pow(10, 9);
                 System.out.println("diff=" + t + " " + diff[0] + " " + diff[1]);
-                socket.send("hi");
+                socket.send(Protocol.toEncodedMessage(null, diff));
             }
         } catch (Exception e) {
             System.out.println("Thread " + threadName + " interrupted." + e);
@@ -92,18 +104,12 @@ public class Bootstrap {
             @SuppressWarnings("unchecked")
             Method compute = mainClass.getMethod("compute", (Class[]) null);
 
-            final RepSocket socket = new RepSocket();
-            socket.setRecvTimeout(-1);
-            socket.setSendTimeout(-1);
-
             String addr = "ipc://" + init.IPC_ROOT + "/" + n + ".sock";
-            socket.connect(addr);
-            System.out.println("Connected to " + addr);
 
-            NodeThread nodeThread = new NodeThread(n, socket, compute);
+            NodeThread nodeThread = new NodeThread(n, addr, compute);
             nodeThread.setContextClassLoader(classloader);
             threads.add(nodeThread);
-            sockets.add(socket);
+            sockets.add(nodeThread.socket);
             nodeThread.start();
         }
 
