@@ -36,11 +36,8 @@ class NodeThread extends Thread {
 
         try {
             while (true) {
-                System.out.println("00000");
                 byte[] req = socket.recvBytes();
-                System.out.println("132323");
                 Map<String, Object> reqMap = Protocol.fromEncodedMessage(req);
-                System.out.println("64565464");
                 System.out.println("Received " + reqMap.toString());
                 Class<?> retType = compute.getReturnType();
                 long start = System.nanoTime();
@@ -50,7 +47,7 @@ class NodeThread extends Thread {
                 double[] diff = new double[2];
                 diff[0] = Math.floor(t);
                 diff[1] = (t - diff[0]) * Math.pow(10, 9);
-                System.out.println("diff=" + t + " " + diff[0] + " " + diff[1]);
+                //System.out.println("diff=" + t + " " + diff[0] + " " + diff[1]);
                 socket.send(Protocol.toEncodedMessage(null, diff));
             }
         } catch (Exception e) {
