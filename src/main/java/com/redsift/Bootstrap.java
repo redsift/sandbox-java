@@ -1,10 +1,61 @@
 package com.redsift;
 
+import nanomsg.reqrep.RepSocket;
+
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+class NodeThread extends Thread {
+    private Thread t;
+    private String threadName;
+    private Method compute;
+    private RepSocket socket;
+
+    NodeThread(String name, RepSocket socket, Method compute) {
+        this.threadName = name;
+        this.socket = socket;
+        this.compute = compute;
+        System.out.println("Creating " + threadName);
+    }
+
+    public void run() {
+        System.out.println("Running " + threadName);
+        try {
+            while (true) {
+                String req = socket.recvString();
+                System.out.println("Received " + req);
+                Class<?> retType = compute.getReturnType();
+                long start = System.nanoTime();
+                Object ret = compute.invoke(null);
+                long end = System.nanoTime();
+                double t = (end - start) / Math.pow(10, 9);
+                double[] diff = new double[2];
+                diff[0] = Math.floor(t);
+                diff[1] = (t - diff[0]) * Math.pow(10, 9);
+                System.out.println("diff=" + t + " " + diff[0] + " " + diff[1]);
+                socket.send("hi");
+            }
+        } catch (Exception e) {
+            System.out.println("Thread " + threadName + " interrupted." + e);
+        }
+        System.out.println("Thread " + threadName + " exiting.");
+    }
+
+    public void start() {
+        System.out.println("Starting " + threadName);
+        if (t == null) {
+            t = new Thread(this, threadName);
+            t.start();
+        }
+    }
+
+}
 
 public class Bootstrap {
 
@@ -13,6 +64,9 @@ public class Bootstrap {
         System.out.println("Bootstrap: " + Arrays.toString(args));
 
         Init init = new Init(args);
+
+        List<Thread> threads = new ArrayList<Thread>();
+        List<RepSocket> sockets = new ArrayList<RepSocket>();
 
         for (String n : args) {
             int i = Integer.parseInt(n);
@@ -31,22 +85,35 @@ public class Bootstrap {
             }
 
             File jarFile = new File(init.SIFT_ROOT, javaFile.file);
-            // feed your URLs to a URLClassLoader!
             ClassLoader classloader = new URLClassLoader(new URL[]{jarFile.toURI().toURL()},
                     ClassLoader.getSystemClassLoader().getParent());
 
-            // relative to that classloader, find the main class
-            // you want to bootstrap, which is the first cmd line arg
             Class mainClass = classloader.loadClass(javaFile.className);
             @SuppressWarnings("unchecked")
             Method compute = mainClass.getMethod("compute", (Class[]) null);
 
-            // well-behaved Java packages work relative to the
-            // context classloader.  Others don't (like commons-logging)
-            Thread.currentThread().setContextClassLoader(classloader);
-            compute.invoke(null);
+            final RepSocket socket = new RepSocket();
+            socket.setRecvTimeout(-1);
+            socket.setSendTimeout(-1);
+
+            String addr = "ipc://" + init.IPC_ROOT + "/" + n + ".sock";
+            socket.connect(addr);
+            System.out.println("Connected to " + addr);
+
+            NodeThread nodeThread = new NodeThread(n, socket, compute);
+            nodeThread.setContextClassLoader(classloader);
+            threads.add(nodeThread);
+            sockets.add(socket);
+            nodeThread.start();
         }
-        
+
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        for (RepSocket socket : sockets) {
+            socket.close();
+        }
     }
 
 }
