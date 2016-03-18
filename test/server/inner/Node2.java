@@ -1,7 +1,16 @@
 package server.inner;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Node2 {
-    public static void compute(){
-    System.out.println("Inner Node2.java");
-  }
+    public static Map<String, Object> compute(Map<String, Object> got) throws Exception {
+        System.out.println("Inner Node2.java" + got.toString());
+        Map<String, Object> ret = new HashMap<String, Object>();
+        ret.put("name", "bucket");
+        ret.put("key", "key");
+        ret.put("value", "value");
+        return ret;
+    }
+
 }

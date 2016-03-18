@@ -17,7 +17,7 @@ public class Protocol {
                 data.put("value", Base64.getEncoder().encodeToString(((String) valObj).getBytes("utf-8")));
             } else if (valObj instanceof byte[]) {
                 data.put("value", Base64.getEncoder().encodeToString((byte[]) valObj));
-            } else if (valObj.getClass().isArray() || valObj.getClass().equals(Map.class)) {
+            } else if (valObj.getClass().equals(ArrayList.class) || valObj.getClass().equals(HashMap.class)) {
                 data.put("value", Base64.getEncoder().encodeToString(Init.mapper.writeValueAsString(valObj).getBytes("utf-8")));
             } else {
                 throw new Exception("unsupported data type");
@@ -30,9 +30,9 @@ public class Protocol {
         List<Object> out = new ArrayList<Object>();
         if (data == null) {
 
-        } else if (data.getClass().equals(Map.class)) {
-            out.add(Protocol.b64Encode((Map<String, Object>) data));
-        } else if (data.getClass().equals(List.class)) {
+        } else if (data.getClass().equals(HashMap.class)) {
+            out.add(Protocol.b64Encode((HashMap<String, Object>) data));
+        } else if (data.getClass().equals(ArrayList.class)) {
             for (Map<String, Object> m : (List<Map<String, Object>>) data) {
                 out.add(Protocol.b64Encode(m));
             }
@@ -42,7 +42,9 @@ public class Protocol {
 
         Map<String, Object> m = new HashMap<String, Object>();
         m.put("out", out);
-        m.put("result", diff);
+        Map<String, Object> stats = new HashMap<String, Object>();
+        stats.put("result", diff);
+        m.put("stats", stats);
         return Init.mapper.writeValueAsBytes(m);
     }
 

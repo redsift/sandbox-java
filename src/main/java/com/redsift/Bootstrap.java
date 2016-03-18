@@ -41,14 +41,14 @@ class NodeThread extends Thread {
                 System.out.println("Received " + reqMap.toString());
                 Class<?> retType = compute.getReturnType();
                 long start = System.nanoTime();
-                Object ret = compute.invoke(null);
+                Object ret = compute.invoke(null, reqMap);
                 long end = System.nanoTime();
                 double t = (end - start) / Math.pow(10, 9);
                 double[] diff = new double[2];
                 diff[0] = Math.floor(t);
                 diff[1] = (t - diff[0]) * Math.pow(10, 9);
                 //System.out.println("diff=" + t + " " + diff[0] + " " + diff[1]);
-                socket.send(Protocol.toEncodedMessage(null, diff));
+                socket.send(Protocol.toEncodedMessage(ret, diff));
             }
         } catch (Exception e) {
             System.out.println("Thread " + threadName + " interrupted." + e);
@@ -99,7 +99,8 @@ public class Bootstrap {
 
             Class mainClass = classloader.loadClass(javaFile.className);
             @SuppressWarnings("unchecked")
-            Method compute = mainClass.getMethod("compute", (Class[]) null);
+            // Method compute = mainClass.getMethod("compute", (Class[]) null);
+            Method compute = mainClass.getMethod("compute", Map.class);
 
             String addr = "ipc://" + init.IPC_ROOT + "/" + n + ".sock";
 
@@ -112,6 +113,8 @@ public class Bootstrap {
 
         for (Thread thread : threads) {
             thread.join();
+            // If any thread exits then something went wrong. Bail out.
+            throw new Exception("Node thread exited!");
         }
 
         for (RepSocket socket : sockets) {
