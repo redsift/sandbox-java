@@ -15,13 +15,12 @@ LABEL io.redsift.dagger.init="/usr/bin/redsift/install" io.redsift.dagger.run="/
 COPY src /tmp/sandbox/src
 COPY assembly.xml /tmp/sandbox
 COPY pom.xml /tmp/sandbox
-RUN ls /tmp/sandbox
 
 WORKDIR /tmp/sandbox
 
 RUN mvn install
 
-RUN cp /tmp/sandbox/target/sandbox-java-*-fat.jar /usr/bin/redsift
+RUN mv /tmp/sandbox/target/sandbox-java-*-fat.jar /usr/bin/redsift/sandbox-java.jar
 
 RUN rm -rf /tmp/sandbox
 

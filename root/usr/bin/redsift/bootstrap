@@ -1,3 +1,3 @@
 #!/bin/bash
 
-/usr/bin/java -cp /usr/bin/redsift/sandbox-java-1.0-fat.jar com.redsift.Bootstrap $@
+/usr/bin/java -cp /usr/bin/redsift/sandbox-java.jar com.redsift.Bootstrap $@
