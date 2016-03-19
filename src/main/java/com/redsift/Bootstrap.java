@@ -114,7 +114,8 @@ public class Bootstrap {
         for (Thread thread : threads) {
             thread.join();
             // If any thread exits then something went wrong. Bail out.
-            throw new Exception("Node thread exited!");
+            System.out.println("Node thread exited!");
+            System.exit(1);
         }
 
         for (RepSocket socket : sockets) {
