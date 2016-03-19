@@ -21,7 +21,9 @@ WORKDIR /tmp/sandbox
 
 RUN mvn install
 
-RUN cp /tmp/src/target/sandbox-java-*-fat.jar /usr/bin/redsift
+RUN cp /tmp/sandbox/target/sandbox-java-*-fat.jar /usr/bin/redsift
+
+RUN rm -rf /tmp/sandbox
 
 VOLUME /run/dagger/sift
 
