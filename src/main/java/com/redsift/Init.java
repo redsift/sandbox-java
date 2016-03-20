@@ -95,7 +95,7 @@ public class Init {
     public String SIFT_ROOT;
     public String SIFT_JSON;
     public String IPC_ROOT;
-    public Boolean DRY;
+    public Boolean DRY = false;
     public SiftJSON sift;
 
     public Init(String args[]) throws Exception {

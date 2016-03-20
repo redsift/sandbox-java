@@ -106,6 +106,10 @@ public class Bootstrap {
 
             Method compute = nodeClass.getMethod("compute", ComputeRequest.class);
 
+            if (init.DRY) {
+                return;
+            }
+
             String addr = "ipc://" + init.IPC_ROOT + "/" + n + ".sock";
 
             NodeThread nodeThread = new NodeThread(n, addr, compute);
