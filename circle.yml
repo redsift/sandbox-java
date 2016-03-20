@@ -41,9 +41,9 @@ deployment:
         set -e
         for JV in $JAVA_VERSIONS
         do
-          JAVA_VERSION=$(docker run -t $JV -version | tr -d '\r' | tr -d '+')
-          VERSION_ARRAY=($JAVA_VERSION)
-          VERSION=v${VERSION_ARRAY[1]}
+          JAVA_VERSION=$(docker run -t --entrypoint=/usr/bin/java $JV -version 2>&1 | cut -s -d '"' -f2)
+          VERSION_ARRAY=(${JAVA_VERSION//_/ })
+          VERSION=v${VERSION_ARRAY[0]}
           MAJOR_NUMBER=(${VERSION//./ })
           MAJOR_VERSION=$MAJOR_NUMBER
           echo "Tagging as $CONTAINER_NAME:$VERSION"

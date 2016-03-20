@@ -27,7 +27,7 @@ public class Protocol {
 
         } else if (data.getClass().equals(ComputeResponse.class)) {
             out.add(Protocol.encodeValue((ComputeResponse) data));
-        } else if (data.getClass().equals(ComputeResponse[].class)) {
+        } else if (data instanceof ComputeResponse[]) {
             for (ComputeResponse d : (ComputeResponse[]) data) {
                 out.add(Protocol.encodeValue(d));
             }
@@ -36,7 +36,7 @@ public class Protocol {
                 out.add(Protocol.encodeValue(d));
             }
         } else {
-            throw new Exception("node implementation has to return Map<String, Object>, List<Map<String, Object>> or null");
+            throw new Exception("node implementation has to return ComputeResponse, ComputeResponse[], List<ComputeResponse> or null");
         }
 
         Map<String, Object> m = new HashMap<String, Object>();
