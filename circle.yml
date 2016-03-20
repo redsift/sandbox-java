@@ -3,7 +3,7 @@ machine:
     CONTAINER_NAME: quay.io/redsift/sandbox-java
     JAVA_VERSIONS: 8
   pre:
-    - sudo curl -L -o /usr/bin/docker 'https://s3-external-1.amazonaws.com/circle-downloads/docker-1.9.0-circleci'
+    - sudo curl -L -o /usr/bin/docker 'https://s3-external-1.amazonaws.com/circle-downloads/docker-1.10.0-circleci'
     - sudo chmod 0755 /usr/bin/docker
   services:
     - docker
