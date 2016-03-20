@@ -13,6 +13,8 @@ public class Install {
         System.out.println("Install: " + Arrays.toString(args));
 
         Init init = new Init(args);
+        String selfJARPath = init.selfJARPath();
+        //System.out.println("selfJARPath=" + selfJARPath);
 
         for (String n : args) {
             int i = Integer.parseInt(n);
@@ -37,9 +39,9 @@ public class Install {
             }
 
             String implPath = implFile.getPath();
-
+            //System.out.println("implPath=" + implPath);
             // Compile
-            String err = executeCommand(new String[]{"javac", implPath}, null);
+            String err = executeCommand(new String[]{"javac", "-nowarn", "-classpath", selfJARPath, implPath}, null);
             if (err != null && err.length() > 0) {
                 throw new Exception("Error compiling Node " + n + " (" + node.implementation.java + "): " + err);
             }

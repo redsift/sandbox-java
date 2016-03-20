@@ -141,4 +141,10 @@ public class Init {
         this.DRY = DRY;
         this.sift = sift;
     }
+
+    public String selfJARPath() {
+        String selfJarPath = Init.class.getResource('/'+Init.class.getName().replace('.', '/')+".class").getPath().replace("file:", "");
+        selfJarPath = selfJarPath.split("!")[0];
+        return selfJarPath;
+    }
 }

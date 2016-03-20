@@ -48,40 +48,10 @@ public class Protocol {
         return Init.mapper.writeValueAsBytes(m);
     }
 
-    public static Map<String, Object> fromEncodedMessage(byte[] bytes) throws Exception {
-        Map<String, Object> m = Init.mapper.readValue(bytes, Map.class);
+    public static ComputeRequest fromEncodedMessage(byte[] bytes) throws Exception {
+        ComputeRequest computeReq = Init.mapper.readValue(bytes, ComputeRequest.class);
+        System.out.println("fromEncodedMessage: " + computeReq.toString());
 
-        System.out.println("fromEncodedMessage" + m.toString());
-
-        Object inObj = m.get("in");
-        Object withObj = m.get("with");
-        List<Object> inWith = new ArrayList<Object>();
-        if (inObj != null) {
-            inWith.add(inObj);
-        }
-        if (withObj != null) {
-            inWith.add(withObj);
-        }
-        for (Object obj : inWith) {
-            Object dataObj = ((Map<String, Object>) obj).get("data");
-            if (dataObj != null) {
-                List<Map<String, Object>> data = (List<Map<String, Object>>) dataObj;
-                for (Map<String, Object> dataItem : data) {
-                    Protocol.b64Decode(dataItem);
-                }
-            }
-        }
-        Object lookupObj = m.get("lookup");
-        if (lookupObj != null) {
-            List<Map<String, Object>> lookup = (List<Map<String, Object>>) lookupObj;
-            for (Map<String, Object> lookupItem : lookup) {
-                Object dataObj = lookupItem.get("data");
-                if (dataObj != null) {
-                    Map<String, Object> data = (Map<String, Object>) dataObj;
-                    Protocol.b64Decode(data);
-                }
-            }
-        }
-        return m;
+        return computeReq;
     }
 }

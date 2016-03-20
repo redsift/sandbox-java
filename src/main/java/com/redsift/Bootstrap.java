@@ -37,11 +37,10 @@ class NodeThread extends Thread {
         try {
             while (true) {
                 byte[] req = socket.recvBytes();
-                Map<String, Object> reqMap = Protocol.fromEncodedMessage(req);
-                System.out.println("Received " + reqMap.toString());
-                Class<?> retType = compute.getReturnType();
+                ComputeRequest computeReq = Protocol.fromEncodedMessage(req);
+                System.out.println("Received " + computeReq.toString());
                 long start = System.nanoTime();
-                Object ret = compute.invoke(null, reqMap);
+                Object ret = compute.invoke(null, computeReq);
                 long end = System.nanoTime();
                 double t = (end - start) / Math.pow(10, 9);
                 double[] diff = new double[2];
@@ -52,6 +51,7 @@ class NodeThread extends Thread {
             }
         } catch (Exception e) {
             System.out.println("Thread " + threadName + " interrupted." + e);
+            e.printStackTrace();
         }
         System.out.println("Thread " + threadName + " exiting.");
     }
@@ -73,9 +73,13 @@ public class Bootstrap {
         System.out.println("Bootstrap: " + Arrays.toString(args));
 
         Init init = new Init(args);
+        File selfJARFile = new File(init.selfJARPath());
+        URL selfJARURL = selfJARFile.toURI().toURL();
 
         List<Thread> threads = new ArrayList<Thread>();
         List<RepSocket> sockets = new ArrayList<RepSocket>();
+
+        ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 
         for (String n : args) {
             int i = Integer.parseInt(n);
@@ -94,13 +98,13 @@ public class Bootstrap {
             }
 
             File jarFile = new File(init.SIFT_ROOT, javaFile.file);
-            ClassLoader classloader = new URLClassLoader(new URL[]{jarFile.toURI().toURL()},
-                    ClassLoader.getSystemClassLoader().getParent());
+            ClassLoader classloader = new URLClassLoader(new URL[]{jarFile.toURI().toURL(), selfJARURL},
+                    //ClassLoader.getSystemClassLoader().getParent()); NOTE: If this is used we'll end up with a mismatch below.
+                    currentClassLoader);
 
-            Class mainClass = classloader.loadClass(javaFile.className);
-            @SuppressWarnings("unchecked")
-            // Method compute = mainClass.getMethod("compute", (Class[]) null);
-            Method compute = mainClass.getMethod("compute", Map.class);
+            Class nodeClass = classloader.loadClass(javaFile.className);
+
+            Method compute = nodeClass.getMethod("compute", ComputeRequest.class);
 
             String addr = "ipc://" + init.IPC_ROOT + "/" + n + ".sock";
 
@@ -115,11 +119,11 @@ public class Bootstrap {
             thread.join();
             // If any thread exits then something went wrong. Bail out.
             System.out.println("Node thread exited!");
-            System.exit(1);
+            //System.exit(1);
         }
 
         for (RepSocket socket : sockets) {
-            socket.close();
+            //socket.close();
         }
     }
 
