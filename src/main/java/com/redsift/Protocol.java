@@ -3,38 +3,37 @@ package com.redsift;
 import java.util.*;
 
 public class Protocol {
-    public static void b64Decode(Map<String, Object> data) {
-        Object valObj = data.get("value");
-        if (valObj != null) {
-            data.put("value", Base64.getDecoder().decode((String) valObj));
-        }
-    }
-
-    public static Map<String, Object> b64Encode(Map<String, Object> data) throws Exception {
-        Object valObj = data.get("value");
+    public static ComputeResponse encodeValue(ComputeResponse data) throws Exception {
+        Object valObj = data.value;
         if (valObj != null) {
             if (valObj.getClass().equals(String.class)) {
-                data.put("value", Base64.getEncoder().encodeToString(((String) valObj).getBytes("utf-8")));
-            } else if (valObj instanceof byte[]) {
-                data.put("value", Base64.getEncoder().encodeToString((byte[]) valObj));
-            } else if (valObj.getClass().equals(ArrayList.class) || valObj.getClass().equals(HashMap.class)) {
-                data.put("value", Base64.getEncoder().encodeToString(Init.mapper.writeValueAsString(valObj).getBytes("utf-8")));
+                data.value = ((String) valObj).getBytes();
+            } else if (valObj instanceof byte[]) { // no-op
             } else {
-                throw new Exception("unsupported data type");
+                try {
+                    data.value = Init.mapper.writeValueAsBytes(valObj);
+                } catch(Exception e) {
+                    throw new Exception("unsupported data type");
+                }
             }
         }
         return data;
     }
 
     public static byte[] toEncodedMessage(Object data, double[] diff) throws Exception {
-        List<Object> out = new ArrayList<Object>();
+        System.out.println("data=" + data + " " + data.getClass());
+        List<ComputeResponse> out = new ArrayList<ComputeResponse>();
         if (data == null) {
 
-        } else if (data.getClass().equals(HashMap.class)) {
-            out.add(Protocol.b64Encode((HashMap<String, Object>) data));
+        } else if (data.getClass().equals(ComputeResponse.class)) {
+            out.add(Protocol.encodeValue((ComputeResponse) data));
+        } else if (data.getClass().equals(ComputeResponse[].class)) {
+            for (ComputeResponse d : (ComputeResponse[]) data) {
+                out.add(Protocol.encodeValue(d));
+            }
         } else if (data.getClass().equals(ArrayList.class)) {
-            for (Map<String, Object> m : (List<Map<String, Object>>) data) {
-                out.add(Protocol.b64Encode(m));
+            for (ComputeResponse d : (List<ComputeResponse>) data) {
+                out.add(Protocol.encodeValue(d));
             }
         } else {
             throw new Exception("node implementation has to return Map<String, Object>, List<Map<String, Object>> or null");

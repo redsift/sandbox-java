@@ -12,6 +12,8 @@ ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
 ENV SIFT_ROOT="/run/dagger/sift" IPC_ROOT="/run/dagger/ipc"
 LABEL io.redsift.dagger.init="/usr/bin/redsift/install" io.redsift.dagger.run="/usr/bin/redsift/bootstrap"
 
+COPY root /
+
 COPY src /tmp/sandbox/src
 COPY assembly.xml /tmp/sandbox
 COPY pom.xml /tmp/sandbox
@@ -20,7 +22,7 @@ WORKDIR /tmp/sandbox
 
 RUN mvn install
 
-RUN mv /tmp/sandbox/target/sandbox-java-*-fat.jar /usr/bin/redsift/sandbox-java.jar
+RUN cp /tmp/sandbox/target/sandbox-java-*-fat.jar /usr/bin/redsift/sandbox-java.jar
 
 RUN rm -rf /tmp/sandbox
 
