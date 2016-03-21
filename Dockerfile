@@ -20,6 +20,10 @@ COPY pom.xml /tmp/sandbox
 
 WORKDIR /tmp/sandbox
 
+# This is needed to fix the maven plugins error "trustAnchors parameter must be non-empty"
+RUN update-ca-certificates -f
+
+# Run maven build
 RUN mvn install
 
 RUN cp /tmp/sandbox/target/sandbox-java-*-fat.jar /usr/bin/redsift/sandbox-java.jar
