@@ -17,7 +17,8 @@ public class ComputeResponse {
     }
 
     public String toString() {
-        return getClass().getName() + "@" + this.name + this.key + this.value + this.epoch;
+        return "[name: " + this.name + ", " + "key: " + this.key + ", " + "value: " + this.value + ", " +
+                "epoch: " + this.epoch + "]";
     }
 
 }

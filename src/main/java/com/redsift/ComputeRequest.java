@@ -3,6 +3,8 @@ package com.redsift;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ComputeRequest {
     public InputData in;
@@ -19,7 +21,8 @@ public class ComputeRequest {
     }
 
     public String toString() {
-        return getClass().getName() + "@" + this.in + this.with + this.query + this.lookup;
+        return "[in: " + this.in + ", " + "with: " + this.with + ", " + "query: " + Arrays.toString(this.query) + ", " +
+                "lookup: " + Arrays.toString(this.lookup) + "]";
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -33,7 +36,7 @@ public class ComputeRequest {
         }
 
         public String toString() {
-            return getClass().getName() + "@" + this.bucket + this.data;
+            return "[bucket: " + this.bucket +", " + "data[]: " + Arrays.toString(this.data) + "]";
         }
     }
 
@@ -48,7 +51,7 @@ public class ComputeRequest {
         }
 
         public String toString() {
-            return getClass().getName() + "@" + this.bucket + this.data;
+            return "[bucket: " + this.bucket +", " + "data: " + this.data + "]";
         }
     }
 
@@ -68,7 +71,9 @@ public class ComputeRequest {
         }
 
         public String toString() {
-            return getClass().getName() + "@" + this.key + this.value + this.epoch + this.generation;
+            return "[key: " + this.key + ", " + "value: " +
+                    (this.value != null ? new String(this.value) : this.value) + ", " + "epoch: " + this.epoch + ", "
+                    + "generation: " + this.generation + "]";
         }
     }
 }

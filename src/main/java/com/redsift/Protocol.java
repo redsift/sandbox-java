@@ -1,6 +1,9 @@
 package com.redsift;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Protocol {
     public static ComputeResponse encodeValue(ComputeResponse data) throws Exception {
@@ -21,7 +24,7 @@ public class Protocol {
     }
 
     public static byte[] toEncodedMessage(Object data, double[] diff) throws Exception {
-        System.out.println("data=" + data + " " + data.getClass());
+        //System.out.println("data=" + data + " " + data.getClass());
         List<ComputeResponse> out = new ArrayList<ComputeResponse>();
         if (data == null) {
 
@@ -49,7 +52,7 @@ public class Protocol {
 
     public static ComputeRequest fromEncodedMessage(byte[] bytes) throws Exception {
         ComputeRequest computeReq = Init.mapper.readValue(bytes, ComputeRequest.class);
-        System.out.println("fromEncodedMessage: " + computeReq.toString());
+        //System.out.println("fromEncodedMessage: " + computeReq.toString());
 
         return computeReq;
     }

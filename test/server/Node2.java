@@ -1,16 +1,12 @@
 package server;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.redsift.ComputeRequest;
+import com.redsift.ComputeResponse;
 
 public class Node2 {
-    public static Map<String, Object> compute(Map<String, Object> got) throws Exception {
-        System.out.println("Node2.java" + got.toString());
-        Map<String, Object> ret = new HashMap<String, Object>();
-        ret.put("name", "bucket");
-        ret.put("key", "key");
-        ret.put("value", "value");
-        return ret;
+    public static ComputeResponse[] compute(ComputeRequest req) throws Exception {
+        System.out.println("Node2.java" + req.toString());
+        ComputeResponse res = new ComputeResponse("bucket", "key", "value", 0);
+        return new ComputeResponse[]{res};
     }
-
 }
