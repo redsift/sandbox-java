@@ -68,13 +68,12 @@ class SiftJSON {
                         jarFile = jarFile.replace(workDir, "");
                         classFile = classFile.replace(workDir, "");
                     }
-                    System.out.println("user file=" + javaFile.file);
-                    System.out.println("user className=" + javaFile.className);
+                    //System.out.println("user file=" + javaFile.file);
+                    //System.out.println("user className=" + javaFile.className);
                     args.add(jarFile);
                     args.add(classFile);
                     args.add(workDir);
 
-                    System.out.println(args.toString());
                     return args;
                 }
 

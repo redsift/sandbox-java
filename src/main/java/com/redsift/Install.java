@@ -58,10 +58,10 @@ public class Install {
                 throw new Exception("Error creating jar for Node " + n + " (" + node.implementation.java + "): " + err);
             }
 
-            System.out.println("JARred node");
+            System.out.println("Created JAR");
 
             node.implementation.java = javaFile.file.replace(".java", ".jar") + ";" + javaFile.className;
-            System.out.println("Rewrote java file: " + node.implementation.java);
+            System.out.println("Rewrote JSON: " + node.implementation.java);
         }
 
         Init.mapper.writeValue(new File(init.SIFT_ROOT, init.SIFT_JSON), init.sift);
@@ -84,14 +84,15 @@ public class Install {
             }
 
         } catch (Exception e) {
-            System.out.println("Exception executing command!");
+            System.out.println("Exception executing command!" + cmdarray.toString());
             e.printStackTrace();
         }
-        String out = "";
-        // This is to avoid the "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8" message in stderr.
+        String out = output.toString();
 
-        if (out != "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8") {
-            out = output.toString();
+        // This is to avoid the "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8" message in stderr.
+        String ignoreStr = "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8\n";
+        if (out.equals(ignoreStr)) {
+            out = "";
         }
         return out;
 
