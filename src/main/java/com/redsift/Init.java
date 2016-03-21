@@ -52,6 +52,22 @@ class SiftJSON {
                         javaFile.className = className;
                     }
 
+                    // Check for maven project
+                    if (javaFile.file.contains("src/main/java/")) {
+                        String[] mstrs = javaFile.file.split("src/main/java/");
+                        String mavenFile = mstrs[0];
+                        String mavenClassName = mstrs[1];
+                        mavenClassName = mavenClassName.replace("/", ".");
+                        mavenClassName = mavenClassName.replace(".java", "");
+                        mavenClassName = mavenClassName.replace(";", "");
+
+                        javaFile.className = mavenClassName;
+                        javaFile.maven = true;
+                        javaFile.mavenPath = mavenFile;
+
+                        System.out.println("Found maven project: " + javaFile.mavenPath + " : className=" + javaFile.className);
+                    }
+
                     return javaFile;
                 }
 
@@ -81,6 +97,8 @@ class SiftJSON {
                     public String file;
                     public String className;
                     public Boolean userSpecified = false;
+                    public Boolean maven = false;
+                    public String mavenPath;
                 }
 
             }

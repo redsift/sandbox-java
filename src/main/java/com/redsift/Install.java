@@ -38,29 +38,65 @@ public class Install {
                     throw new Exception("Implementation at index " + n + " (" + node.implementation.java + ") does not exist!");
                 }
 
-                String implPath = implFile.getPath();
-                //System.out.println("implPath=" + implPath);
-                // Compile
-                String err = executeCommand(new String[]{"javac", "-nowarn", "-classpath", selfJARPath, implPath}, null);
-                if (err != null && err.length() > 0) {
-                    throw new Exception("Error compiling Node " + n + " (" + node.implementation.java + "): " + err);
+                if (javaFile.maven) {
+                    File mavenFile = new File(init.SIFT_ROOT, javaFile.mavenPath);
+                    File mavenOutputDir = new File(mavenFile.getPath(), "target");
+
+                    String err = executeCommand(new String[]{"mvn", "package"}, mavenFile);
+                    if (err != null && err.length() > 0) {
+                        throw new Exception("Error building with Maven " + n + " (" + node.implementation.java + "): " + err);
+                    }
+
+                    System.out.println("Maven build success");
+
+                    File[] directoryListing = mavenOutputDir.listFiles();
+                    String jarName = null;
+                    long jarSize = 0;
+                    for (File fileName : directoryListing) {
+                        if (fileName.getPath().contains(".jar")) {
+                            if (jarName == null) {
+                                jarName = fileName.getPath();
+                                jarSize = fileName.length();
+                            } else {
+                                if (fileName.length() > jarSize) {
+                                    jarName = fileName.getPath();
+                                    jarSize = fileName.length();
+                                }
+                            }
+                        }
+                    }
+
+                    jarName = jarName.replace(init.SIFT_ROOT, "");
+                    if (jarName.charAt(0) == '/') {
+                        jarName = jarName.substring(1);
+                    }
+                    node.implementation.java = jarName + ";" + javaFile.className;
+                    System.out.println("rewrote to maven jar file: " + node.implementation.java);
+                } else {
+                    String implPath = implFile.getPath();
+                    //System.out.println("implPath=" + implPath);
+                    // Compile
+                    String err = executeCommand(new String[]{"javac", "-nowarn", "-classpath", selfJARPath, implPath}, null);
+                    if (err != null && err.length() > 0) {
+                        throw new Exception("Error compiling Node " + n + " (" + node.implementation.java + "): " + err);
+                    }
+
+                    System.out.println("Compiled node");
+
+                    // JARify. jar cvf Node.jar Node.class
+                    List<String> jarCmds = node.implementation.jarCommand(javaFile);
+                    String workDir = jarCmds.get(jarCmds.size() - 1);
+                    jarCmds.remove(jarCmds.size() - 1);
+                    err = null;
+                    err = executeCommand(jarCmds.toArray(new String[0]), new File(init.SIFT_ROOT, workDir));
+                    if (err != null && err.length() > 0) {
+                        throw new Exception("Error creating jar for Node " + n + " (" + node.implementation.java + "): " + err);
+                    }
+
+                    System.out.println("Created JAR");
+
+                    node.implementation.java = javaFile.file.replace(".java", ".jar") + ";" + javaFile.className;
                 }
-
-                System.out.println("Compiled node");
-
-                // JARify. jar cvf Node.jar Node.class
-                List<String> jarCmds = node.implementation.jarCommand(javaFile);
-                String workDir = jarCmds.get(jarCmds.size() - 1);
-                jarCmds.remove(jarCmds.size() - 1);
-                err = null;
-                err = executeCommand(jarCmds.toArray(new String[0]), new File(init.SIFT_ROOT, workDir));
-                if (err != null && err.length() > 0) {
-                    throw new Exception("Error creating jar for Node " + n + " (" + node.implementation.java + "): " + err);
-                }
-
-                System.out.println("Created JAR");
-
-                node.implementation.java = javaFile.file.replace(".java", ".jar") + ";" + javaFile.className;
                 System.out.println("Rewrote JSON: " + node.implementation.java);
             }
 
