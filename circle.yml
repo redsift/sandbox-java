@@ -25,11 +25,11 @@ test:
         INIT=$(docker inspect -f "{{index .ContainerConfig.Labels \"io.redsift.dagger.init\" }}" $JV)
         echo "Calling init = $INIT"
         docker run -v $PWD/test:/run/dagger/sift $JV $INIT 0
-        ls -A $PWD/test/server/site-packages || true
+        ls -A $PWD/test/server || true
         RUN=$(docker inspect -f "{{index .ContainerConfig.Labels \"io.redsift.dagger.run\" }}" $JV)
         echo "Calling run = $RUN"
         docker run -v $PWD/test:/run/dagger/sift -e DRY=true $JV $RUN 0
-        sudo rm -Rf $PWD/test/server/*.class $PWD/test/server/*.jar
+        sudo rm -Rf $PWD/test/server/*.class $PWD/test/server/*.jar || true
       done
   
 deployment:
