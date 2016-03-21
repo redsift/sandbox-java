@@ -105,9 +105,9 @@ public class Init {
         String SIFT_ROOT = System.getenv("SIFT_ROOT");
         String SIFT_JSON = System.getenv("SIFT_JSON");
         String IPC_ROOT = System.getenv("IPC_ROOT");
-        Boolean DRY = System.getenv("DRY") == "true";
+        Boolean DRY = System.getenv("DRY").equals("true");
 
-        if (SIFT_ROOT == null || SIFT_ROOT == "") {
+        if (SIFT_ROOT == null || SIFT_ROOT.equals("")) {
             throw new Exception("Environment SIFT_ROOT not set");
         }
 
@@ -116,11 +116,11 @@ public class Init {
             throw new Exception("Environment SIFT_ROOT '" + SIFT_ROOT + "' must be absolute");
         }
 
-        if (SIFT_JSON == null || SIFT_JSON == "") {
+        if (SIFT_JSON == null || SIFT_JSON.equals("")) {
             throw new Exception("Environment SIFT_JSON not set");
         }
 
-        if (IPC_ROOT == null || IPC_ROOT == "") {
+        if (IPC_ROOT == null || IPC_ROOT.equals("")) {
             throw new Exception("Environment IPC_ROOT not set");
         }
 

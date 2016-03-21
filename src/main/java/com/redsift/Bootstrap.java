@@ -85,7 +85,7 @@ public class Bootstrap {
             for (String n : args) {
                 int i = Integer.parseInt(n);
                 System.out.println("");
-                System.out.println("n: " + n + " i: " + i);
+                //System.out.println("n: " + n + " i: " + i);
                 SiftJSON.Dag.Node node = init.sift.dag.nodes[i];
 
                 if (node.implementation == null || node.implementation.java == null) {
