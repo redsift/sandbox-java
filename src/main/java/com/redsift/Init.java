@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class SiftJSON {
@@ -64,33 +62,9 @@ class SiftJSON {
                         javaFile.className = mavenClassName;
                         javaFile.maven = true;
                         javaFile.mavenPath = mavenFile;
-
-                        System.out.println("Found maven project: " + javaFile.mavenPath + " : className=" + javaFile.className);
                     }
 
                     return javaFile;
-                }
-
-                public List<String> jarCommand(JavaFile javaFile) {
-                    String workDir = "";
-                    List<String> args = new ArrayList<String>();
-                    args.add("jar");
-                    args.add("cvf");
-                    String jarFile = javaFile.file.replace(".java", ".jar");
-                    String classFile = javaFile.file.replace(".java", ".class");
-                    if (javaFile.userSpecified) {
-                        workDir = javaFile.file.replace(javaFile.className.replace(".", "/"), "");
-                        workDir = workDir.replace(".java", "");
-                        jarFile = jarFile.replace(workDir, "");
-                        classFile = classFile.replace(workDir, "");
-                    }
-                    //System.out.println("user file=" + javaFile.file);
-                    //System.out.println("user className=" + javaFile.className);
-                    args.add(jarFile);
-                    args.add(classFile);
-                    args.add(workDir);
-
-                    return args;
                 }
 
                 public static class JavaFile {
