@@ -9,9 +9,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
 
-# This is to avoid the "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8" message in stderr.
-RUN rm /usr/share/upstart/sessions/jayatana.conf
-
 ENV SIFT_ROOT="/run/dagger/sift" IPC_ROOT="/run/dagger/ipc" SIFT_JSON="sift.json"
 LABEL io.redsift.dagger.init="/usr/bin/redsift/install" io.redsift.dagger.run="/usr/bin/redsift/bootstrap"
 

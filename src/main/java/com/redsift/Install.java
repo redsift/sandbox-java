@@ -87,8 +87,13 @@ public class Install {
             System.out.println("Exception executing command!");
             e.printStackTrace();
         }
+        String out = "";
+        // This is to avoid the "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8" message in stderr.
 
-        return output.toString();
+        if (out != "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8") {
+            out = output.toString();
+        }
+        return out;
 
     }
 }
