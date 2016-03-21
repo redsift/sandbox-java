@@ -1,7 +1,5 @@
 package server;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.redsift.ComputeRequest;
 import com.redsift.ComputeResponse;
 import java.nio.charset.StandardCharsets;

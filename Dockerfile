@@ -26,7 +26,7 @@ RUN update-ca-certificates -f
 # Run maven build
 RUN mvn install
 
-RUN cp /tmp/sandbox/target/sandbox-java-*-fat.jar /usr/bin/redsift/sandbox-java.jar
+RUN cp /tmp/sandbox/target/compute-*-fat.jar /usr/bin/redsift/compute.jar
 
 RUN rm -rf /tmp/sandbox
 

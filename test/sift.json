@@ -19,6 +19,12 @@
 				"java": "server/inner/Node2.java"
 			}
 		},
+        {
+            "#": "Test Node Maven 1",
+            "implementation": {
+                "java": "server/src/main/java/com/redsift/MavenNode1.java"
+            }
+        },
 		{
 			"#": "Test Node -Alt 2",
 			"implementation": {
