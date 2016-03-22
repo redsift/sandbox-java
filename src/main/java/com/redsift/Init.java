@@ -60,7 +60,7 @@ class SiftJSON {
                     }
 
                     // Check for maven project
-                    if (implFile.impl == "java") {
+                    if (implFile.impl.equals("java")) {
                         if (implFile.file.contains("src/main/java/")) {
                             String[] mstrs = implFile.file.split("src/main/java/");
                             String mavenFile = mstrs[0];

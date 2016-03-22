@@ -132,7 +132,7 @@ public class Bootstrap {
                 //socket.close();
             }
         } catch (Exception ex) {
-            System.out.println("Error running bootstrap: " + ex.toString());
+            System.err.println("Error running bootstrap: " + ex.toString());
             ex.printStackTrace();
             System.exit(1);
         }

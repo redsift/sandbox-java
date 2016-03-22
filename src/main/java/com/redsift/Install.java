@@ -41,7 +41,7 @@ public class Install {
                     throw new Exception("Implementation at index " + n + " (" + implFile.file + ") does not exist!");
                 }
 
-                if (implFile.impl == "java") {
+                if (implFile.impl.equals("java")) {
                     if (implFile.maven) {
                         System.out.println("Found maven project at " + implFile.mavenPath + "pom.xml");
                         // mvn package
@@ -52,20 +52,23 @@ public class Install {
                         node.implementation.java = jarName + ";" + implFile.className;
                     } else {
                         // Compile
-                        Install.compileJava(n, node, implementationFile.getPath(), selfJARPath);
+                        File classesFile = Install.compile(n, node.implementation.java, implFile,
+                                implementationFile.getPath(), selfJARPath, implementationFile.getParentFile());
 
                         // Create JAR
-                        Install.createJavaJAR(n, node, implFile, init);
+                        String jarName = Install.createJAR(n, node.implementation.java, implFile, classesFile, init);
 
-                        // Rewrite java attribute.
-                        node.implementation.java = implFile.file.replace(".java", ".jar") + ";" + implFile.className;
+                        // Rewrite scala attribute.
+                        implFile.file = jarName;
+                        node.implementation.java = jarName + ";" + implFile.className;
                     }
                 } else { // Scala
                     // Compile
-                    File classesFile = Install.compileScala(n, node, implementationFile.getPath(), selfJARPath, implementationFile.getParentFile());
+                    File classesFile = Install.compile(n, node.implementation.scala, implFile,
+                            implementationFile.getPath(), selfJARPath, implementationFile.getParentFile());
 
                     // Create JAR
-                    String jarName = Install.createScalaJAR(n, node, implFile, classesFile, init);
+                    String jarName = Install.createJAR(n, node.implementation.scala, implFile, classesFile, init);
 
                     // Rewrite scala attribute.
                     implFile.file = jarName;
@@ -77,7 +80,7 @@ public class Install {
 
             Init.mapper.writeValue(new File(init.SIFT_ROOT, init.SIFT_JSON), init.sift);
         } catch (Exception ex) {
-            System.out.println("Error running install: " + ex.toString());
+            System.err.println("Error running install: " + ex.toString());
             ex.printStackTrace();
             System.exit(1);
         }
@@ -112,43 +115,6 @@ public class Install {
         }
         return out;
 
-    }
-
-    private static void compileJava(String n, SiftJSON.Dag.Node node, String implPath,
-                                    String selfJARPath) throws Exception {
-        String err = executeCommand(new String[]{"javac", "-nowarn", "-classpath", selfJARPath, implPath}, null);
-        if (err != null && err.length() > 0) {
-            throw new Exception("Error compiling Node " + n + " (" + node.implementation.java + "): " + err);
-        }
-
-        System.out.println("Compiled node");
-    }
-
-    private static void createJavaJAR(String n, SiftJSON.Dag.Node node,
-                                      SiftJSON.Dag.Node.Implementation.ImplFile javaFile, Init init) throws Exception {
-        String workDir = "";
-        List<String> args = new ArrayList<String>();
-        args.add("jar");
-        args.add("cvf");
-        String jarFile = javaFile.file.replace(".java", ".jar");
-        String classFile = javaFile.file.replace(".java", ".class");
-        if (javaFile.userSpecified) {
-            workDir = javaFile.file.replace(javaFile.className.replace(".", "/"), "");
-            workDir = workDir.replace(".java", "");
-            jarFile = jarFile.replace(workDir, "");
-            classFile = classFile.replace(workDir, "");
-        }
-        //System.out.println("user file=" + javaFile.file);
-        //System.out.println("user className=" + javaFile.className);
-
-        String[] jarCmds = new String[]{"jar", "cvf", jarFile, classFile};
-
-        String err = executeCommand(jarCmds, new File(init.SIFT_ROOT, workDir));
-        if (err != null && err.length() > 0) {
-            throw new Exception("Error creating jar for Node " + n + " (" + node.implementation.java + "): " + err);
-        }
-
-        System.out.println("Created JAR");
     }
 
     private static String runMaven(String n, SiftJSON.Dag.Node node,
@@ -188,29 +154,29 @@ public class Install {
         return jarName;
     }
 
-    private static File compileScala(String n, SiftJSON.Dag.Node node, String implPath,
-                                    String selfJARPath, File parentFile) throws Exception {
-        File classesFile = new File(parentFile.getPath(), "classes");
-        System.out.println(classesFile.getPath() + " exists: " + classesFile.exists());
+    private static File compile(String n, String impl,
+                                     SiftJSON.Dag.Node.Implementation.ImplFile implFile, String implPath,
+                                     String selfJARPath, File parentFile) throws Exception {
+        File classesFile = new File(parentFile.getPath(), "classes/" + implFile.impl);
+        //System.out.println(classesFile.getPath() + " exists: " + classesFile.exists() + " implPath=" + implPath);
         if (!classesFile.exists()) {
-            System.out.println("Making dir " + classesFile.getPath());
-            classesFile.mkdir();
+            //System.out.println("Making dir " + classesFile.getPath());
+            classesFile.mkdirs();
         }
 
-        String err = executeCommand(new String[]{"scalac", "-nowarn", "-d", "classes", "-classpath", selfJARPath,
+        String err = executeCommand(new String[]{implFile.impl + "c", "-nowarn", "-d", "classes/" + implFile.impl, "-classpath", selfJARPath,
                 implPath}, parentFile);
         if (err != null && err.length() > 0) {
-            throw new Exception("Error compiling Node " + n + " (" + node.implementation.scala + "): " + err);
+            throw new Exception("Error compiling Node " + n + " (" + impl + "): " + err);
         }
 
         System.out.println("Compiled node");
         return classesFile;
     }
 
-    private static String createScalaJAR(String n, SiftJSON.Dag.Node node,
+    private static String createJAR(String n, String impl,
                                       SiftJSON.Dag.Node.Implementation.ImplFile scalaFile,
                                        File classesFile, Init init) throws Exception {
-        String workDir = "";
         List<String> args = new ArrayList<String>();
         args.add("jar");
         args.add("cvf");
@@ -218,17 +184,17 @@ public class Install {
         classFile += ".class";
         String jarFile = classFile.replace(".class", ".jar");
         String classFile1 = classFile.replace(".class", "$.class");
-        System.out.println("user file=" + scalaFile.file);
-        System.out.println("user classFile=" + classFile);
-        System.out.println("user classFile1=" + classFile1);
-        System.out.println("user jarFile=" + jarFile);
-        System.out.println("user className=" + scalaFile.className);
+        //System.out.println("user file=" + scalaFile.file);
+        //System.out.println("user classFile=" + classFile);
+        //System.out.println("user classFile1=" + classFile1);
+        //System.out.println("user jarFile=" + jarFile);
+        //System.out.println("user className=" + scalaFile.className);
 
-        String[] jarCmds = new String[]{"jar", "cvf", jarFile, classFile, classFile1};
+        String[] jarCmds = new String[]{"jar", "cvf", jarFile, classFile + (scalaFile.impl.equals("scala") ? " " + classFile1 : "")};
 
         String err = executeCommand(jarCmds, classesFile);
         if (err != null && err.length() > 0) {
-            throw new Exception("Error creating jar for Node " + n + " (" + node.implementation.scala + "): " + err);
+            throw new Exception("Error creating jar for Node " + n + " (" + impl + "): " + err);
         }
 
         System.out.println("Created JAR");
