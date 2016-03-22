@@ -175,12 +175,12 @@ public class Install {
     }
 
     private static String createJAR(String n, String impl,
-                                      SiftJSON.Dag.Node.Implementation.ImplFile scalaFile,
+                                      SiftJSON.Dag.Node.Implementation.ImplFile implFile,
                                        File classesFile, Init init) throws Exception {
         List<String> args = new ArrayList<String>();
         args.add("jar");
         args.add("cvf");
-        String classFile = scalaFile.className.replace(".", "/");
+        String classFile = implFile.className.replace(".", "/");
         classFile += ".class";
         String jarFile = classFile.replace(".class", ".jar");
         String classFile1 = classFile.replace(".class", "$.class");
@@ -190,7 +190,10 @@ public class Install {
         //System.out.println("user jarFile=" + jarFile);
         //System.out.println("user className=" + scalaFile.className);
 
-        String[] jarCmds = new String[]{"jar", "cvf", jarFile, classFile + (scalaFile.impl.equals("scala") ? " " + classFile1 : "")};
+        String[] jarCmds = new String[]{"jar", "cvf", jarFile, classFile};
+        if (implFile.impl.equals("scala")) {
+            jarCmds = new String[]{"jar", "cvf", jarFile, classFile, classFile1};
+        }
 
         String err = executeCommand(jarCmds, classesFile);
         if (err != null && err.length() > 0) {
