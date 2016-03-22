@@ -29,45 +29,57 @@ class SiftJSON {
 
             @JsonIgnoreProperties(ignoreUnknown = true)
             public static class Implementation {
-                public String java;
+                public String java = null;
+                public String scala = null;
 
-                public Implementation(@JsonProperty("java") String java) {
+                public Implementation(@JsonProperty("java") String java, @JsonProperty("scala") String scala) {
                     this.java = java;
+                    this.scala = scala;
                 }
 
-                public JavaFile javaFile() {
-                    JavaFile javaFile = new JavaFile();
+                public ImplFile implFile() {
+                    ImplFile implFile = new ImplFile();
 
-                    String[] strs = this.java.split(";");
-                    javaFile.file = strs[0];
+                    String impl = this.java;
+                    implFile.impl = "java";
+                    if (this.java == null) {
+                        impl = this.scala;
+                        implFile.impl = "scala";
+                    }
+
+                    String[] strs = impl.split(";");
+                    implFile.file = strs[0];
                     if (strs.length == 2) {
-                        javaFile.className = strs[1];
-                        javaFile.userSpecified = true;
+                        implFile.className = strs[1];
+                        implFile.userSpecified = true;
                     } else {
-                        String className = this.java.replace("/", ".");
-                        className = className.replace(".java", "");
+                        String className = impl.replace("/", ".");
+                        className = className.replace("." + implFile.impl, "");
                         className = className.replace(";", "");
-                        javaFile.className = className;
+                        implFile.className = className;
                     }
 
                     // Check for maven project
-                    if (javaFile.file.contains("src/main/java/")) {
-                        String[] mstrs = javaFile.file.split("src/main/java/");
-                        String mavenFile = mstrs[0];
-                        String mavenClassName = mstrs[1];
-                        mavenClassName = mavenClassName.replace("/", ".");
-                        mavenClassName = mavenClassName.replace(".java", "");
-                        mavenClassName = mavenClassName.replace(";", "");
+                    if (implFile.impl == "java") {
+                        if (implFile.file.contains("src/main/java/")) {
+                            String[] mstrs = implFile.file.split("src/main/java/");
+                            String mavenFile = mstrs[0];
+                            String mavenClassName = mstrs[1];
+                            mavenClassName = mavenClassName.replace("/", ".");
+                            mavenClassName = mavenClassName.replace(".java", "");
+                            mavenClassName = mavenClassName.replace(";", "");
 
-                        javaFile.className = mavenClassName;
-                        javaFile.maven = true;
-                        javaFile.mavenPath = mavenFile;
+                            implFile.className = mavenClassName;
+                            implFile.maven = true;
+                            implFile.mavenPath = mavenFile;
+                        }
                     }
 
-                    return javaFile;
+                    return implFile;
                 }
 
-                public static class JavaFile {
+                public static class ImplFile {
+                    public String impl;
                     public String file;
                     public String className;
                     public Boolean userSpecified = false;

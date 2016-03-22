@@ -87,22 +87,24 @@ public class Bootstrap {
                 //System.out.println("n: " + n + " i: " + i);
                 SiftJSON.Dag.Node node = init.sift.dag.nodes[i];
 
-                if (node.implementation == null || node.implementation.java == null) {
-                    throw new Exception("Requested to run a non-Java node at index " + n);
+                if (node.implementation == null || (node.implementation.java == null && node.implementation.scala == null)) {
+                    throw new Exception("Requested to run a non-Java or non-Scala node at index " + n);
                 }
 
-                System.out.println("Running node: " + node.description + " : " + node.implementation.java);
-                SiftJSON.Dag.Node.Implementation.JavaFile javaFile = node.implementation.javaFile();
-                if (!javaFile.file.contains(".jar")) {
+                SiftJSON.Dag.Node.Implementation.ImplFile implFile = node.implementation.implFile();
+
+                System.out.println("Running node: " + node.description + " : " + implFile.file);
+
+                if (!implFile.file.contains(".jar")) {
                     throw new Exception("Node not installed, bailing out!");
                 }
 
-                File jarFile = new File(init.SIFT_ROOT, javaFile.file);
+                File jarFile = new File(init.SIFT_ROOT, implFile.file);
                 ClassLoader classloader = new URLClassLoader(new URL[]{jarFile.toURI().toURL(), selfJARURL},
                         //ClassLoader.getSystemClassLoader().getParent()); NOTE: If this is used we'll end up with a mismatch below.
                         currentClassLoader);
 
-                Class nodeClass = classloader.loadClass(javaFile.className);
+                Class nodeClass = classloader.loadClass(implFile.className);
 
                 Method compute = nodeClass.getMethod("compute", ComputeRequest.class);
 
