@@ -147,7 +147,14 @@ public class Init {
 
     public String selfJARPath() {
         String selfJarPath = Init.class.getResource('/'+Init.class.getName().replace('.', '/')+".class").getPath().replace("file:", "");
-        selfJarPath = selfJarPath.split("!")[0];
-        return selfJarPath;
+        return selfJarPath.split("!")[0];
+    }
+
+    public String computeJARPath() {
+        String selfJARPath = this.selfJARPath();
+        File selfJARFile = new File(selfJARPath);
+        String jarParentFile = selfJARFile.getParent();
+        String computeJARPath = new File(jarParentFile, "compute.jar").getPath();
+        return computeJARPath;
     }
 }

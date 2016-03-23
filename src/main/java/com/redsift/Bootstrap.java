@@ -37,7 +37,7 @@ class NodeThread extends Thread {
             while (true) {
                 byte[] req = socket.recvBytes();
                 ComputeRequest computeReq = Protocol.fromEncodedMessage(req);
-                System.out.println("Received " + computeReq.toString());
+                //System.out.println("Received " + computeReq.toString());
                 long start = System.nanoTime();
                 Object ret = compute.invoke(null, computeReq);
                 long end = System.nanoTime();

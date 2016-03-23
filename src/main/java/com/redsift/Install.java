@@ -14,8 +14,8 @@ public class Install {
             System.out.println("Install: " + Arrays.toString(args));
 
             Init init = new Init(args);
-            String selfJARPath = init.selfJARPath();
-            //System.out.println("selfJARPath=" + selfJARPath);
+            String computeJARPath = init.computeJARPath();
+            //System.out.println("computeJARPath=" + computeJARPath);
 
             for (String n : args) {
                 int i = Integer.parseInt(n);
@@ -53,7 +53,7 @@ public class Install {
                     } else {
                         // Compile
                         File classesFile = Install.compile(n, node.implementation.java, implFile,
-                                implementationFile.getPath(), selfJARPath, implementationFile.getParentFile());
+                                implementationFile.getPath(), computeJARPath, implementationFile.getParentFile());
 
                         // Create JAR
                         String jarName = Install.createJAR(n, node.implementation.java, implFile, classesFile, init);
@@ -65,7 +65,7 @@ public class Install {
                 } else { // Scala
                     // Compile
                     File classesFile = Install.compile(n, node.implementation.scala, implFile,
-                            implementationFile.getPath(), selfJARPath, implementationFile.getParentFile());
+                            implementationFile.getPath(), computeJARPath, implementationFile.getParentFile());
 
                     // Create JAR
                     String jarName = Install.createJAR(n, node.implementation.scala, implFile, classesFile, init);
@@ -156,7 +156,7 @@ public class Install {
 
     private static File compile(String n, String impl,
                                      SiftJSON.Dag.Node.Implementation.ImplFile implFile, String implPath,
-                                     String selfJARPath, File parentFile) throws Exception {
+                                     String computeJARPath, File parentFile) throws Exception {
         File classesFile = new File(parentFile.getPath(), "classes/" + implFile.impl);
         //System.out.println(classesFile.getPath() + " exists: " + classesFile.exists() + " implPath=" + implPath);
         if (!classesFile.exists()) {
@@ -164,7 +164,7 @@ public class Install {
             classesFile.mkdirs();
         }
 
-        String err = executeCommand(new String[]{implFile.impl + "c", "-nowarn", "-d", "classes/" + implFile.impl, "-classpath", selfJARPath,
+        String err = executeCommand(new String[]{implFile.impl + "c", "-nowarn", "-d", "classes/" + implFile.impl, "-classpath", computeJARPath,
                 implPath}, parentFile);
         if (err != null && err.length() > 0) {
             throw new Exception("Error compiling Node " + n + " (" + impl + "): " + err);
