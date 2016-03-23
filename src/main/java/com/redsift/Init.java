@@ -51,7 +51,6 @@ class SiftJSON {
                     implFile.file = strs[0];
                     if (strs.length == 2) {
                         implFile.className = strs[1];
-                        implFile.userSpecified = true;
                     } else {
                         String className = impl.replace("/", ".");
                         className = className.replace("." + implFile.impl, "");
@@ -70,8 +69,23 @@ class SiftJSON {
                             mavenClassName = mavenClassName.replace(";", "");
 
                             implFile.className = mavenClassName;
-                            implFile.maven = true;
-                            implFile.mavenPath = mavenFile;
+                            implFile.maven = new ImplFile.MavenTool();
+                            implFile.maven.path = mavenFile;
+                            implFile.buildTool = true;
+                        }
+                    } else { // Check for sbt Scala
+                        if (implFile.file.contains("src/main/scala/")) {
+                            String[] mstrs = implFile.file.split("src/main/scala/");
+                            String sbtFile = mstrs[0];
+                            String sbtClassName = mstrs[1];
+                            sbtClassName = sbtClassName.replace("/", ".");
+                            sbtClassName = sbtClassName.replace(".scala", "");
+                            sbtClassName = sbtClassName.replace(";", "");
+
+                            implFile.className = sbtClassName;
+                            implFile.sbt = new ImplFile.SbtTool();
+                            implFile.sbt.path = sbtFile;
+                            implFile.buildTool = true;
                         }
                     }
 
@@ -82,9 +96,17 @@ class SiftJSON {
                     public String impl;
                     public String file;
                     public String className;
-                    public Boolean userSpecified = false;
-                    public Boolean maven = false;
-                    public String mavenPath;
+                    public Boolean buildTool = false;
+                    public MavenTool maven = null;
+                    public SbtTool sbt = null;
+
+                    public static class MavenTool {
+                        public String path;
+                    }
+
+                    public static class SbtTool {
+                        public String path;
+                    }
                 }
 
             }

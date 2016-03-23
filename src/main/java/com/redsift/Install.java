@@ -42,10 +42,11 @@ public class Install {
                 }
 
                 if (implFile.impl.equals("java")) {
-                    if (implFile.maven) {
-                        System.out.println("Found maven project at " + implFile.mavenPath + "pom.xml");
+                    if (implFile.maven != null) {
+                        System.out.println("Found maven project at " + implFile.maven.path + "pom.xml");
                         // mvn package
-                        String jarName = Install.runMaven(n, node, implFile, init);
+                        String jarName = Install.runBuildTool(n, node.implementation.java, "Maven", implFile.maven.path,
+                                implFile, init);
 
                         // Rewrite java attribute.
                         implFile.file = jarName;
@@ -58,21 +59,32 @@ public class Install {
                         // Create JAR
                         String jarName = Install.createJAR(n, node.implementation.java, implFile, classesFile, init);
 
-                        // Rewrite scala attribute.
+                        // Rewrite java attribute.
                         implFile.file = jarName;
                         node.implementation.java = jarName + ";" + implFile.className;
                     }
                 } else { // Scala
-                    // Compile
-                    File classesFile = Install.compile(n, node.implementation.scala, implFile,
-                            implementationFile.getPath(), computeJARPath, implementationFile.getParentFile());
+                    if (implFile.sbt != null) {
+                        System.out.println("Found maven project at " + implFile.sbt.path + "build.sbt");
+                        // sbt package
+                        String jarName = Install.runBuildTool(n, node.implementation.scala, "SBT", implFile.sbt.path,
+                                implFile, init);
 
-                    // Create JAR
-                    String jarName = Install.createJAR(n, node.implementation.scala, implFile, classesFile, init);
+                        // Rewrite scala attribute.
+                        implFile.file = jarName;
+                        node.implementation.scala = jarName + ";" + implFile.className;
+                    } else {
+                        // Compile
+                        File classesFile = Install.compile(n, node.implementation.scala, implFile,
+                                implementationFile.getPath(), computeJARPath, implementationFile.getParentFile());
 
-                    // Rewrite scala attribute.
-                    implFile.file = jarName;
-                    node.implementation.scala = jarName + ";" + implFile.className;
+                        // Create JAR
+                        String jarName = Install.createJAR(n, node.implementation.scala, implFile, classesFile, init);
+
+                        // Rewrite scala attribute.
+                        implFile.file = jarName;
+                        node.implementation.scala = jarName + ";" + implFile.className;
+                    }
                 }
 
                 System.out.println("Rewrote JSON: " + implFile.file);
@@ -117,19 +129,8 @@ public class Install {
 
     }
 
-    private static String runMaven(String n, SiftJSON.Dag.Node node,
-                                 SiftJSON.Dag.Node.Implementation.ImplFile javaFile, Init init) throws Exception {
-        File mavenFile = new File(init.SIFT_ROOT, javaFile.mavenPath);
-        File mavenOutputDir = new File(mavenFile.getPath(), "target");
-
-        String err = executeCommand(new String[]{"mvn", "package"}, mavenFile);
-        if (err != null && err.length() > 0) {
-            throw new Exception("Error building with Maven " + n + " (" + node.implementation.java + "): " + err);
-        }
-
-        System.out.println("Maven build success");
-
-        File[] directoryListing = mavenOutputDir.listFiles();
+    private static String findJarFile(File toolOutputDir, Init init) {
+        File[] directoryListing = toolOutputDir.listFiles();
         String jarName = null;
         long jarSize = 0;
         for (File fileName : directoryListing) {
@@ -146,9 +147,41 @@ public class Install {
             }
         }
 
-        jarName = jarName.replace(init.SIFT_ROOT, "");
-        if (jarName.charAt(0) == '/') {
-            jarName = jarName.substring(1);
+        if (jarName != null) {
+            jarName = jarName.replace(init.SIFT_ROOT, "");
+            if (jarName.charAt(0) == '/') {
+                jarName = jarName.substring(1);
+            }
+        }
+
+        return jarName;
+    }
+
+    private static String runBuildTool(String n, String impl, String toolName, String toolPath,
+                                 SiftJSON.Dag.Node.Implementation.ImplFile implFile, Init init) throws Exception {
+        File toolFile = new File(init.SIFT_ROOT, toolPath);
+        File toolOutputDir = new File(toolFile.getPath(), "target");
+
+        String[] toolCmds = new String[]{"mvn", "package"};
+        if (implFile.sbt != null) {
+            toolCmds = new String[]{"sbt", "package", "--error"};
+        }
+        String err = executeCommand(toolCmds, toolFile);
+        if (err != null && err.length() > 0) {
+            throw new Exception("Error building with " + toolName + " " + n + " (" + impl + "): " + err);
+        }
+
+        System.out.println(toolName + " build success");
+
+        String jarName = Install.findJarFile(toolOutputDir, init);
+
+        if (jarName == null) {
+            File[] directoryListing = toolOutputDir.listFiles();
+            for (File fileName : directoryListing) {
+                if (fileName.getPath().contains("/target/scala")) {
+                    jarName = Install.findJarFile(fileName, init);
+                }
+            }
         }
 
         return jarName;
