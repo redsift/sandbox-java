@@ -31,10 +31,13 @@ class SiftJSON {
             public static class Implementation {
                 public String java = null;
                 public String scala = null;
+                public String clojure = null;
 
-                public Implementation(@JsonProperty("java") String java, @JsonProperty("scala") String scala) {
+                public Implementation(@JsonProperty("java") String java, @JsonProperty("scala") String scala,
+                                      @JsonProperty("clojure") String clojure) {
                     this.java = java;
                     this.scala = scala;
+                    this.clojure = clojure;
                 }
 
                 public ImplFile implFile() {
@@ -42,9 +45,12 @@ class SiftJSON {
 
                     String impl = this.java;
                     implFile.impl = "java";
-                    if (this.java == null) {
+                    if (this.scala != null) {
                         impl = this.scala;
                         implFile.impl = "scala";
+                    } else if (this.clojure != null) { // Clojure
+                        impl = this.clojure;
+                        implFile.impl = "clojure";
                     }
 
                     String[] strs = impl.split(";");
@@ -73,7 +79,7 @@ class SiftJSON {
                             implFile.maven.path = mavenFile;
                             implFile.buildTool = true;
                         }
-                    } else { // Check for sbt Scala
+                    } else if (implFile.impl.equals("scala")) { // Check for sbt Scala
                         if (implFile.file.contains("src/main/scala/")) {
                             String[] mstrs = implFile.file.split("src/main/scala/");
                             String sbtFile = mstrs[0];
@@ -85,6 +91,22 @@ class SiftJSON {
                             implFile.className = sbtClassName;
                             implFile.sbt = new ImplFile.SbtTool();
                             implFile.sbt.path = sbtFile;
+                            implFile.buildTool = true;
+                        }
+                    } else { // Clojure
+                        implFile.className += "$compute";
+                        if (implFile.file.contains("src/")) {
+                            int lastIndex = implFile.file.lastIndexOf("src/");
+                            String sbtFile = implFile.file.substring(0, lastIndex);
+                            String sbtClassName = implFile.file.substring(lastIndex + "src/".length());
+                            sbtClassName = sbtClassName.replace("/", ".");
+                            sbtClassName = sbtClassName.replace(".clj", "");
+                            sbtClassName = sbtClassName.replace(";", "");
+                            // TODO: - vs _
+
+                            implFile.className = sbtClassName;
+                            implFile.lein = new ImplFile.LeinTool();
+                            implFile.lein.path = sbtFile;
                             implFile.buildTool = true;
                         }
                     }
@@ -99,12 +121,17 @@ class SiftJSON {
                     public Boolean buildTool = false;
                     public MavenTool maven = null;
                     public SbtTool sbt = null;
+                    public LeinTool lein = null;
 
                     public static class MavenTool {
                         public String path;
                     }
 
                     public static class SbtTool {
+                        public String path;
+                    }
+
+                    public static class LeinTool {
                         public String path;
                     }
                 }

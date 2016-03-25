@@ -20,11 +20,12 @@ public class Install {
             for (String n : args) {
                 int i = Integer.parseInt(n);
                 System.out.println("");
-                System.out.println("n: " + n + " i: " + i);
+                //System.out.println("n: " + n + " i: " + i);
                 SiftJSON.Dag.Node node = init.sift.dag.nodes[i];
 
-                if (node.implementation == null || (node.implementation.java == null && node.implementation.scala == null)) {
-                    throw new Exception("Requested to install a non-Java or non-Scala node at index " + n);
+                if (node.implementation == null || (node.implementation.java == null &&
+                        node.implementation.scala == null && node.implementation.clojure == null)) {
+                    throw new Exception("Requested to install a non-Java, non-Scala or non-Clojure node at index " + n);
                 }
 
                 SiftJSON.Dag.Node.Implementation.ImplFile implFile = node.implementation.implFile();
@@ -48,9 +49,7 @@ public class Install {
                         String jarName = Install.runBuildTool(n, node.implementation.java, "Maven", implFile.maven.path,
                                 implFile, init);
 
-                        // Rewrite java attribute.
                         implFile.file = jarName;
-                        node.implementation.java = jarName + ";" + implFile.className;
                     } else {
                         // Compile
                         File classesFile = Install.compile(n, node.implementation.java, implFile,
@@ -59,20 +58,19 @@ public class Install {
                         // Create JAR
                         String jarName = Install.createJAR(n, node.implementation.java, implFile, classesFile, init);
 
-                        // Rewrite java attribute.
                         implFile.file = jarName;
-                        node.implementation.java = jarName + ";" + implFile.className;
                     }
-                } else { // Scala
+                    // Rewrite java attribute.
+                    node.implementation.java = implFile.file + ";" + implFile.className;
+                    System.out.println("Rewrote JSON: " + node.implementation.java);
+                } else if (implFile.impl.equals("scala")) { // Scala
                     if (implFile.sbt != null) {
                         System.out.println("Found maven project at " + implFile.sbt.path + "build.sbt");
                         // sbt package
                         String jarName = Install.runBuildTool(n, node.implementation.scala, "SBT", implFile.sbt.path,
                                 implFile, init);
 
-                        // Rewrite scala attribute.
                         implFile.file = jarName;
-                        node.implementation.scala = jarName + ";" + implFile.className;
                     } else {
                         // Compile
                         File classesFile = Install.compile(n, node.implementation.scala, implFile,
@@ -81,13 +79,33 @@ public class Install {
                         // Create JAR
                         String jarName = Install.createJAR(n, node.implementation.scala, implFile, classesFile, init);
 
-                        // Rewrite scala attribute.
                         implFile.file = jarName;
-                        node.implementation.scala = jarName + ";" + implFile.className;
                     }
-                }
+                    // Rewrite scala attribute.
+                    node.implementation.scala = implFile.file + ";" + implFile.className;
+                    System.out.println("Rewrote JSON: " + node.implementation.scala);
+                } else { // Clojure
+                    if (implFile.lein != null) {
+                        System.out.println("Found lein project at " + implFile.lein.path + "project.clj");
+                        // lein uberjar
+                        String jarName = Install.runBuildTool(n, node.implementation.clojure, "Lein", implFile.lein.path,
+                                implFile, init);
 
-                System.out.println("Rewrote JSON: " + implFile.file);
+                        implFile.file = jarName;
+                    } else {
+                        // Compile
+                        File classesFile = Install.compileClojure(n, node.implementation.clojure, implFile,
+                                implementationFile.getPath(), computeJARPath, implementationFile.getParentFile());
+
+                        // Create JAR
+                        String jarName = Install.createJAR(n, node.implementation.clojure, implFile, classesFile, init);
+
+                        implFile.file = jarName;
+                    }
+                    // Rewrite clojure attribute.
+                    node.implementation.clojure = implFile.file + ";" + implFile.className;
+                    System.out.println("Rewrote JSON: " + node.implementation.clojure);
+                }
             }
 
             Init.mapper.writeValue(new File(init.SIFT_ROOT, init.SIFT_JSON), init.sift);
@@ -122,7 +140,11 @@ public class Install {
 
         // This is to avoid the "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8" message in stderr.
         String ignoreStr = "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8\n";
+        String ignoreStrLein = "Compiling ";
         if (out.equals(ignoreStr)) {
+            out = "";
+        } else if(out.startsWith(ignoreStrLein) && out.split("\\n").length == 1) {
+            System.out.println("Lein output: " + out);
             out = "";
         }
         return out;
@@ -159,13 +181,18 @@ public class Install {
 
     private static String runBuildTool(String n, String impl, String toolName, String toolPath,
                                  SiftJSON.Dag.Node.Implementation.ImplFile implFile, Init init) throws Exception {
+        System.out.println("runBuildTool: " + toolName + " : " + toolPath + " : " + implFile.file + " : " +
+                            implFile.className);
         File toolFile = new File(init.SIFT_ROOT, toolPath);
         File toolOutputDir = new File(toolFile.getPath(), "target");
 
         String[] toolCmds = new String[]{"mvn", "package"};
         if (implFile.sbt != null) {
             toolCmds = new String[]{"sbt", "package", "--error"};
+        } else if (implFile.lein != null) {
+            toolCmds = new String[]{"lein", "uberjar"};
         }
+
         String err = executeCommand(toolCmds, toolFile);
         if (err != null && err.length() > 0) {
             throw new Exception("Error building with " + toolName + " " + n + " (" + impl + "): " + err);
@@ -175,6 +202,7 @@ public class Install {
 
         String jarName = Install.findJarFile(toolOutputDir, init);
 
+        // Scala: trick to find the jar
         if (jarName == null) {
             File[] directoryListing = toolOutputDir.listFiles();
             for (File fileName : directoryListing) {
@@ -197,7 +225,29 @@ public class Install {
             classesFile.mkdirs();
         }
 
-        String err = executeCommand(new String[]{implFile.impl + "c", "-nowarn", "-d", "classes/" + implFile.impl, "-classpath", computeJARPath,
+        String err = executeCommand(new String[]{implFile.impl + "c", "-nowarn", "-d", "classes/" + implFile.impl,
+                "-classpath", computeJARPath,
+                implPath}, parentFile);
+        if (err != null && err.length() > 0) {
+            throw new Exception("Error compiling Node " + n + " (" + impl + "): " + err);
+        }
+
+        System.out.println("Compiled node");
+        return classesFile;
+    }
+
+    private static File compileClojure(String n, String impl,
+                                SiftJSON.Dag.Node.Implementation.ImplFile implFile, String implPath,
+                                String computeJARPath, File parentFile) throws Exception {
+        File classesFile = new File(parentFile.getPath(), "classes/" + implFile.impl);
+        //System.out.println(classesFile.getPath() + " exists: " + classesFile.exists() + " implPath=" + implPath);
+        if (!classesFile.exists()) {
+            //System.out.println("Making dir " + classesFile.getPath());
+            classesFile.mkdirs();
+        }
+
+        String err = executeCommand(new String[]{implFile.impl + "c", "-nowarn", "-d", "classes/" + implFile.impl,
+                "-classpath", computeJARPath,
                 implPath}, parentFile);
         if (err != null && err.length() > 0) {
             throw new Exception("Error compiling Node " + n + " (" + impl + "): " + err);
@@ -216,17 +266,14 @@ public class Install {
         String classFile = implFile.className.replace(".", "/");
         classFile += ".class";
         String jarFile = classFile.replace(".class", ".jar");
-        String classFile1 = classFile.replace(".class", "$.class");
-        //System.out.println("user file=" + scalaFile.file);
-        //System.out.println("user classFile=" + classFile);
-        //System.out.println("user classFile1=" + classFile1);
-        //System.out.println("user jarFile=" + jarFile);
-        //System.out.println("user className=" + scalaFile.className);
+        String classFile1 = classFile.replace(".class", "*.class");
+        //System.out.println("createJAR file = " + implFile.file);
+        //System.out.println("createJAR classFile = " + classFile);
+        //System.out.println("createJAR jarFile = " + jarFile);
+        //System.out.println("createJAR className = " + implFile.className);
+        //System.out.println("createJAR classesdir = "+ classesFile);
 
         String[] jarCmds = new String[]{"jar", "cvf", jarFile, classFile};
-        if (implFile.impl.equals("scala")) {
-            jarCmds = new String[]{"jar", "cvf", jarFile, classFile, classFile1};
-        }
 
         String err = executeCommand(jarCmds, classesFile);
         if (err != null && err.length() > 0) {

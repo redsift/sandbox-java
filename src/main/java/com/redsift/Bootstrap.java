@@ -87,8 +87,9 @@ public class Bootstrap {
                 //System.out.println("n: " + n + " i: " + i);
                 SiftJSON.Dag.Node node = init.sift.dag.nodes[i];
 
-                if (node.implementation == null || (node.implementation.java == null && node.implementation.scala == null)) {
-                    throw new Exception("Requested to run a non-Java or non-Scala node at index " + n);
+                if (node.implementation == null || (node.implementation.java == null &&
+                        node.implementation.scala == null && node.implementation.clojure == null)) {
+                    throw new Exception("Requested to install a non-Java, non-Scala or non-Clojure node at index " + n);
                 }
 
                 SiftJSON.Dag.Node.Implementation.ImplFile implFile = node.implementation.implFile();
@@ -106,7 +107,13 @@ public class Bootstrap {
 
                 Class nodeClass = classloader.loadClass(implFile.className);
 
-                Method compute = nodeClass.getMethod("compute", ComputeRequest.class);
+                Method compute = null;
+
+                if (implFile.impl == "clojure") {
+                    compute = nodeClass.getMethod("invokeStatic", Object.class);
+                } else {
+                    compute = nodeClass.getMethod("compute", ComputeRequest.class);
+                }
 
                 if (init.DRY) {
                     return;
