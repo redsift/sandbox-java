@@ -116,8 +116,8 @@ public class Install {
         }
     }
 
-    private static String executeCommand(String[] cmdarray, File dir) {
-
+    private static String executeCommand(String[] cmdarray, File dir,
+                                         SiftJSON.Dag.Node.Implementation.ImplFile implFile) {
         StringBuffer output = new StringBuffer();
 
         Process p;
@@ -140,12 +140,20 @@ public class Install {
 
         // This is to avoid the "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8" message in stderr.
         String ignoreStr = "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8\n";
-        String ignoreStrLein = "Compiling ";
         if (out.equals(ignoreStr)) {
             out = "";
-        } else if(out.startsWith(ignoreStrLein) && out.split("\\n").length == 1) {
-            System.out.println("Lein output: " + out);
-            out = "";
+        }
+
+        if (implFile.lein != null) {
+            String ignoreStrLein = "Compiling ";
+            int lastIndex = out.lastIndexOf(ignoreStrLein);
+            if (lastIndex > 0) {
+                out = out.substring(lastIndex);
+            }
+            if (out.startsWith(ignoreStrLein) && out.split("\\n").length == 1) {
+                //System.out.println("Lein output: " + out);
+                out = "";
+            }
         }
         return out;
 
@@ -181,8 +189,7 @@ public class Install {
 
     private static String runBuildTool(String n, String impl, String toolName, String toolPath,
                                  SiftJSON.Dag.Node.Implementation.ImplFile implFile, Init init) throws Exception {
-        System.out.println("runBuildTool: " + toolName + " : " + toolPath + " : " + implFile.file + " : " +
-                            implFile.className);
+        //System.out.println("runBuildTool: " + toolName + " : " + toolPath + " : " + implFile.file + " : " + implFile.className);
         File toolFile = new File(init.SIFT_ROOT, toolPath);
         File toolOutputDir = new File(toolFile.getPath(), "target");
 
@@ -193,7 +200,7 @@ public class Install {
             toolCmds = new String[]{"lein", "uberjar"};
         }
 
-        String err = executeCommand(toolCmds, toolFile);
+        String err = executeCommand(toolCmds, toolFile, implFile);
         if (err != null && err.length() > 0) {
             throw new Exception("Error building with " + toolName + " " + n + " (" + impl + "): " + err);
         }
@@ -227,7 +234,7 @@ public class Install {
 
         String err = executeCommand(new String[]{implFile.impl + "c", "-nowarn", "-d", "classes/" + implFile.impl,
                 "-classpath", computeJARPath,
-                implPath}, parentFile);
+                implPath}, parentFile, implFile);
         if (err != null && err.length() > 0) {
             throw new Exception("Error compiling Node " + n + " (" + impl + "): " + err);
         }
@@ -248,7 +255,7 @@ public class Install {
 
         String err = executeCommand(new String[]{implFile.impl + "c", "-nowarn", "-d", "classes/" + implFile.impl,
                 "-classpath", computeJARPath,
-                implPath}, parentFile);
+                implPath}, parentFile, implFile);
         if (err != null && err.length() > 0) {
             throw new Exception("Error compiling Node " + n + " (" + impl + "): " + err);
         }
@@ -275,7 +282,7 @@ public class Install {
 
         String[] jarCmds = new String[]{"jar", "cvf", jarFile, classFile};
 
-        String err = executeCommand(jarCmds, classesFile);
+        String err = executeCommand(jarCmds, classesFile, implFile);
         if (err != null && err.length() > 0) {
             throw new Exception("Error creating jar for Node " + n + " (" + impl + "): " + err);
         }
