@@ -14,7 +14,7 @@ public class Install {
             System.out.println("Install: " + Arrays.toString(args));
 
             Init init = new Init(args);
-            String computeJARPath = init.computeJARPath();
+            String computeJARPath = Init.computeJARPath();
             //System.out.println("computeJARPath=" + computeJARPath);
 
             for (String n : args) {
@@ -53,7 +53,7 @@ public class Install {
                     } else {
                         // Compile
                         File classesFile = Install.compile(n, node.implementation.java, implFile,
-                                implementationFile.getPath(), computeJARPath, implementationFile.getParentFile());
+                                implementationFile.getPath(), computeJARPath, implementationFile.getParentFile(), init);
 
                         // Create JAR
                         String jarName = Install.createJAR(n, node.implementation.java, implFile, classesFile, init);
@@ -74,7 +74,7 @@ public class Install {
                     } else {
                         // Compile
                         File classesFile = Install.compile(n, node.implementation.scala, implFile,
-                                implementationFile.getPath(), computeJARPath, implementationFile.getParentFile());
+                                implementationFile.getPath(), computeJARPath, implementationFile.getParentFile(), init);
 
                         // Create JAR
                         String jarName = Install.createJAR(n, node.implementation.scala, implFile, classesFile, init);
@@ -94,8 +94,8 @@ public class Install {
                         implFile.file = jarName;
                     } else {
                         // Compile
-                        File classesFile = Install.compileClojure(n, node.implementation.clojure, implFile,
-                                implementationFile.getPath(), computeJARPath, implementationFile.getParentFile());
+                        File classesFile = Install.compile(n, node.implementation.clojure, implFile,
+                                implementationFile.getPath(), computeJARPath, implementationFile.getParentFile(), init);
 
                         // Create JAR
                         String jarName = Install.createJAR(n, node.implementation.clojure, implFile, classesFile, init);
@@ -224,7 +224,7 @@ public class Install {
 
     private static File compile(String n, String impl,
                                      SiftJSON.Dag.Node.Implementation.ImplFile implFile, String implPath,
-                                     String computeJARPath, File parentFile) throws Exception {
+                                     String computeJARPath, File parentFile, Init init) throws Exception {
         File classesFile = new File(parentFile.getPath(), "classes/" + implFile.impl);
         //System.out.println(classesFile.getPath() + " exists: " + classesFile.exists() + " implPath=" + implPath);
         if (!classesFile.exists()) {
@@ -232,30 +232,26 @@ public class Install {
             classesFile.mkdirs();
         }
 
-        String err = executeCommand(new String[]{implFile.impl + "c", "-nowarn", "-d", "classes/" + implFile.impl,
-                "-classpath", computeJARPath,
-                implPath}, parentFile, implFile);
-        if (err != null && err.length() > 0) {
-            throw new Exception("Error compiling Node " + n + " (" + impl + "): " + err);
+        String[] cmds = new String[]{implFile.impl + "c", "-nowarn", "-d", "classes/" + implFile.impl,
+                "-cp", computeJARPath, implPath};
+        File cmdDir = parentFile;
+        if (implFile.impl.equals("clj")) {
+            //java -cp /Users/deepakp/workspace/containers/sandbox-java/target/compute.jar:/Users/deepakp/workspace/containers/sandbox-clojure/test:/Users/deepakp/workspace/containers/sandbox-clojure/target/clojure-1.8.0.jar
+            // -Dclojure.compile.path=/Users/deepakp/workspace/containers/sandbox-clojure/test/classes clojure.lang.Compile server.node1
+            String basePath = implFile.file;
+            String className = implFile.className;
+            className = className.replace("$compute", "");
+            basePath = basePath.replace(".clj", "");
+            basePath = basePath.replace(className.replace(".", "/"), "");
+            cmdDir = new File(init.SIFT_ROOT, basePath);
+            cmds = new String[]{"java", "-cp", computeJARPath + ":" + cmdDir.getPath() + ":" + Init.clojureJARPath(),
+                    "-Dclojure.compile.path=" + classesFile.getPath(), "clojure.lang.Compile", className};
+            //System.out.println("basePath= " + basePath);
+            //System.out.println("cmds= " + Arrays.toString(cmds));
         }
 
-        System.out.println("Compiled node");
-        return classesFile;
-    }
+        String err = executeCommand(cmds, cmdDir, implFile);
 
-    private static File compileClojure(String n, String impl,
-                                SiftJSON.Dag.Node.Implementation.ImplFile implFile, String implPath,
-                                String computeJARPath, File parentFile) throws Exception {
-        File classesFile = new File(parentFile.getPath(), "classes/" + implFile.impl);
-        //System.out.println(classesFile.getPath() + " exists: " + classesFile.exists() + " implPath=" + implPath);
-        if (!classesFile.exists()) {
-            //System.out.println("Making dir " + classesFile.getPath());
-            classesFile.mkdirs();
-        }
-
-        String err = executeCommand(new String[]{implFile.impl + "c", "-nowarn", "-d", "classes/" + implFile.impl,
-                "-classpath", computeJARPath,
-                implPath}, parentFile, implFile);
         if (err != null && err.length() > 0) {
             throw new Exception("Error compiling Node " + n + " (" + impl + "): " + err);
         }

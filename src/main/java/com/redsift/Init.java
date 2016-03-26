@@ -50,7 +50,7 @@ class SiftJSON {
                         implFile.impl = "scala";
                     } else if (this.clojure != null) { // Clojure
                         impl = this.clojure;
-                        implFile.impl = "clojure";
+                        implFile.impl = "clj";
                     }
 
                     String[] strs = impl.split(";");
@@ -94,7 +94,9 @@ class SiftJSON {
                             implFile.buildTool = true;
                         }
                     } else { // Clojure
-                        implFile.className += "$compute";
+                        if (!implFile.className.endsWith("$compute")) {
+                            implFile.className += "$compute";
+                        }
                         if (implFile.file.contains("src/")) {
                             int lastIndex = implFile.file.lastIndexOf("src/");
                             String sbtFile = implFile.file.substring(0, lastIndex);
@@ -194,16 +196,22 @@ public class Init {
         this.sift = sift;
     }
 
-    public String selfJARPath() {
+    public static String selfJARPath() {
         String selfJarPath = Init.class.getResource('/'+Init.class.getName().replace('.', '/')+".class").getPath().replace("file:", "");
         return selfJarPath.split("!")[0];
     }
 
-    public String computeJARPath() {
-        String selfJARPath = this.selfJARPath();
+    public static String computeJARPath() {
+        String selfJARPath = Init.selfJARPath();
         File selfJARFile = new File(selfJARPath);
         String jarParentFile = selfJARFile.getParent();
-        String computeJARPath = new File(jarParentFile, "compute.jar").getPath();
-        return computeJARPath;
+        return new File(jarParentFile, "compute.jar").getPath();
+    }
+
+    public static String clojureJARPath() {
+        String selfJARPath = Init.selfJARPath();
+        File selfJARFile = new File(selfJARPath);
+        String jarParentFile = selfJARFile.getParent();
+        return new File(jarParentFile, "clojure.jar").getPath();
     }
 }

@@ -109,7 +109,7 @@ public class Bootstrap {
 
                 Method compute = null;
 
-                if (implFile.impl == "clojure") {
+                if (implFile.impl.equals("clj")) {
                     compute = nodeClass.getMethod("invokeStatic", Object.class);
                 } else {
                     compute = nodeClass.getMethod("compute", ComputeRequest.class);
