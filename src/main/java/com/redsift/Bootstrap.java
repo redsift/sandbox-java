@@ -73,8 +73,6 @@ public class Bootstrap {
             System.out.println("Bootstrap: " + Arrays.toString(args));
 
             Init init = new Init(args);
-            File selfJARFile = new File(init.selfJARPath());
-            URL selfJARURL = selfJARFile.toURI().toURL();
 
             List<Thread> threads = new ArrayList<Thread>();
             List<RepSocket> sockets = new ArrayList<RepSocket>();
@@ -101,7 +99,14 @@ public class Bootstrap {
                 }
 
                 File jarFile = new File(init.SIFT_ROOT, implFile.file);
-                ClassLoader classloader = new URLClassLoader(new URL[]{jarFile.toURI().toURL(), selfJARURL},
+                URL[] jars = new URL[]{jarFile.toURI().toURL()};
+                if (node.implementation.clojure != null) {
+                    File clojureJARFile = new File(Init.clojureJARPath());
+                    URL clojureJARURL = clojureJARFile.toURI().toURL();
+                    jars = new URL[]{jarFile.toURI().toURL(), clojureJARURL};
+                }
+
+                ClassLoader classloader = new URLClassLoader(jars,
                         //ClassLoader.getSystemClassLoader().getParent()); NOTE: If this is used we'll end up with a mismatch below.
                         currentClassLoader);
 
