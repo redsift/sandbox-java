@@ -15,6 +15,7 @@ LABEL io.redsift.dagger.init="/usr/bin/redsift/install" io.redsift.dagger.run="/
 COPY root /
 
 COPY src /tmp/sandbox/src
+COPY external /tmp/sandbox/external
 COPY assembly.xml /tmp/sandbox
 COPY pom.xml /tmp/sandbox
 
