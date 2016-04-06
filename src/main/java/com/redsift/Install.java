@@ -87,7 +87,7 @@ public class Install {
                 } else { // Clojure
                     if (implFile.lein != null) {
                         System.out.println("Found lein project at " + implFile.lein.path + "project.clj");
-                        // lein uberjar
+                        // lein jar
                         String jarName = Install.runBuildTool(n, node.implementation.clojure, "Lein", implFile.lein.path,
                                 implFile, init);
 
@@ -197,7 +197,7 @@ public class Install {
         if (implFile.sbt != null) {
             toolCmds = new String[]{"sbt", "package", "--error"};
         } else if (implFile.lein != null) {
-            toolCmds = new String[]{"lein", "uberjar"};
+            toolCmds = new String[]{"lein", "jar"};
         }
 
         String err = executeCommand(toolCmds, toolFile, implFile);

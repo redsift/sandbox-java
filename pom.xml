@@ -41,6 +41,11 @@
             </plugin>
         </plugins>
     </build>
+    <properties>
+        <version.jnanomsg>0.4.4</version.jnanomsg>
+        <version.jackson>2.6.3</version.jackson>
+        <version.multiline-string>0.1.1</version.multiline-string>
+    </properties>
     <repositories>
         <repository>
             <id>clojars.org</id>
@@ -64,17 +69,19 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.6.3</version>
+            <version>${version.jackson}</version>
         </dependency>
         <dependency>
             <groupId>jnanomsg</groupId>
             <artifactId>jnanomsg</artifactId>
-            <version>0.4.3</version>
+            <version>${version.jnanomsg}</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/external/jnanomsg-${version.jnanomsg}.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.adrianwalker</groupId>
             <artifactId>multiline-string</artifactId>
-            <version>0.1.1</version>
+            <version>${version.multiline-string}</version>
         </dependency>
     </dependencies>
 </project>

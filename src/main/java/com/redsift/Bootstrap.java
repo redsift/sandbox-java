@@ -1,5 +1,6 @@
 package com.redsift;
 
+import nanomsg.Nanomsg;
 import nanomsg.reqrep.RepSocket;
 
 import java.io.File;
@@ -27,8 +28,10 @@ class NodeThread extends Thread {
     public void run() {
         System.out.println("Running " + threadName);
         this.socket = new RepSocket();
-        this.socket.setRecvTimeout(-1);
-        this.socket.setSendTimeout(-1);
+        this.socket.setSocketOpt(Nanomsg.SocketOption.NN_RCVMAXSIZE, -1);
+
+        this.socket.setSocketOpt(Nanomsg.SocketOption.NN_RCVTIMEO, -1);
+        this.socket.setSocketOpt(Nanomsg.SocketOption.NN_SNDTIMEO, -1);
 
         this.socket.connect(this.addr);
         System.out.println("Connected to " + this.addr);

@@ -1,5 +1,6 @@
 package com.redsift;
 
+import nanomsg.Nanomsg;
 import nanomsg.reqrep.ReqSocket;
 import org.adrianwalker.multilinestring.Multiline;
 
@@ -45,8 +46,10 @@ public class Test {
         for (String n : args) {
             final ReqSocket socket = new ReqSocket();
             String addr = "ipc://" + "/tmp" + "/" + n + ".sock";
-            socket.setRecvTimeout(-1);
-            socket.setSendTimeout(-1);
+            socket.setSocketOpt(Nanomsg.SocketOption.NN_RCVMAXSIZE, -1);
+
+            socket.setSocketOpt(Nanomsg.SocketOption.NN_RCVTIMEO, -1);
+            socket.setSocketOpt(Nanomsg.SocketOption.NN_SNDTIMEO, -1);
 
             socket.bind(addr);
 

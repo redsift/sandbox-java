@@ -14,8 +14,15 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.6.3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.6.0" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.6.3" level="project" />
-    <orderEntry type="library" name="Maven: jnanomsg:jnanomsg:0.4.3" level="project" />
-    <orderEntry type="library" name="Maven: net.java.dev.jna:jna:4.2.1" level="project" />
+    <orderEntry type="module-library">
+      <library name="Maven: jnanomsg:jnanomsg:0.4.4">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/external/jnanomsg-0.4.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="library" name="Maven: org.adrianwalker:multiline-string:0.1.1" level="project" />
     <orderEntry type="module-library">
       <library name="Maven: sun.jdk:tools:LATEST">
