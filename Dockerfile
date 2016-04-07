@@ -1,15 +1,14 @@
-FROM ubuntu:15.10
+FROM quay.io/redsift/sandbox:latest
 MAINTAINER Deepak Prabhakara email: deepak@redsift.io version: 1.1.101
 
 # Install JDK without things like fuse
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
-    apt-get install -y --no-install-recommends openjdk-8-jdk maven libnanomsg-dev && \
+    apt-get install -y --no-install-recommends openjdk-8-jdk maven && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
 
-ENV SIFT_ROOT="/run/dagger/sift" IPC_ROOT="/run/dagger/ipc" SIFT_JSON="sift.json"
 LABEL io.redsift.dagger.init="/usr/bin/redsift/install" io.redsift.dagger.run="/usr/bin/redsift/bootstrap"
 
 COPY root /
@@ -34,9 +33,5 @@ RUN cp /tmp/sandbox/target/sandbox-*-fat.jar /usr/bin/redsift/sandbox.jar
 RUN rm -rf /tmp/sandbox
 
 RUN mvn install:install-file -Dfile=/usr/bin/redsift/compute.jar -DgroupId=com.redsift -DartifactId=compute -Dversion=1.0 -Dpackaging=jar
-
-VOLUME /run/dagger/sift
-
-WORKDIR /run/dagger/sift
 
 ENTRYPOINT ["/bin/bash"]
