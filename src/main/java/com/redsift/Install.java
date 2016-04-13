@@ -123,14 +123,22 @@ public class Install {
         Process p;
         try {
             p = Runtime.getRuntime().exec(cmdarray, null, dir);
-            p.waitFor();
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(p.getInputStream()) );
+            String inLine = "";
+            while ((inLine = in.readLine()) != null) {
+                System.out.println(inLine);
+            }
+            in.close();
+
             BufferedReader reader =
                     new BufferedReader(new InputStreamReader(p.getErrorStream()));
-
             String line = "";
             while ((line = reader.readLine()) != null) {
                 output.append(line + "\n");
             }
+            reader.close();
 
         } catch (Exception e) {
             System.out.println("Exception executing command!" + cmdarray.toString());
