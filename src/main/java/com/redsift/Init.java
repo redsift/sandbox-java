@@ -22,6 +22,7 @@ class SiftJSON {
         public static class Node {
             public String description;
             public Implementation implementation;
+
             public Node(@JsonProperty("#") String description, @JsonProperty("implementation") Implementation implementation) {
                 this.description = description;
                 this.implementation = implementation;
@@ -197,7 +198,7 @@ public class Init {
     }
 
     public static String selfJARPath() {
-        String selfJarPath = Init.class.getResource('/'+Init.class.getName().replace('.', '/')+".class").getPath().replace("file:", "");
+        String selfJarPath = Init.class.getResource('/' + Init.class.getName().replace('.', '/') + ".class").getPath().replace("file:", "");
         return selfJarPath.split("!")[0];
     }
 

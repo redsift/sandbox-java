@@ -36,7 +36,7 @@ public class ComputeRequest {
         }
 
         public String toString() {
-            return "[bucket: " + this.bucket +", " + "data[]: " + Arrays.toString(this.data) + "]";
+            return "[bucket: " + this.bucket + ", " + "data[]: " + Arrays.toString(this.data) + "]";
         }
     }
 
@@ -51,7 +51,7 @@ public class ComputeRequest {
         }
 
         public String toString() {
-            return "[bucket: " + this.bucket +", " + "data: " + this.data + "]";
+            return "[bucket: " + this.bucket + ", " + "data: " + this.data + "]";
         }
     }
 

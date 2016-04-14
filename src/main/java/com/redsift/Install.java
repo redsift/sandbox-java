@@ -326,9 +326,9 @@ public class Install {
     }
 
     private static void saveSiftJSON(JSONObject jsonObject, Init init) throws Exception {
-            FileWriter file = new FileWriter(new File(init.SIFT_ROOT, init.SIFT_JSON).getPath());
-            file.write(jsonObject.toJSONString());
-            file.flush();
-            file.close();
+        FileWriter file = new FileWriter(new File(init.SIFT_ROOT, init.SIFT_JSON).getPath());
+        file.write(jsonObject.toJSONString());
+        file.flush();
+        file.close();
     }
 }
