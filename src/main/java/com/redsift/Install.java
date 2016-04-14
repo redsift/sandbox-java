@@ -1,10 +1,13 @@
 package com.redsift;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class Install {
@@ -16,12 +19,16 @@ public class Install {
             Init init = new Init(args);
             String computeJARPath = Init.computeJARPath();
             //System.out.println("computeJARPath=" + computeJARPath);
-
+            JSONObject jsonObject = Install.getSiftJSON(init);
+            JSONObject dagObject = (JSONObject) jsonObject.get("dag");
+            JSONArray dagNodes = (JSONArray) dagObject.get("nodes");
             for (String n : args) {
                 int i = Integer.parseInt(n);
                 System.out.println("");
                 //System.out.println("n: " + n + " i: " + i);
                 SiftJSON.Dag.Node node = init.sift.dag.nodes[i];
+                JSONObject dagNode = (JSONObject) dagNodes.get(i);
+                JSONObject dagImplementation = (JSONObject) dagNode.get("implementation");
 
                 if (node.implementation == null || (node.implementation.java == null &&
                         node.implementation.scala == null && node.implementation.clojure == null)) {
@@ -62,6 +69,7 @@ public class Install {
                     }
                     // Rewrite java attribute.
                     node.implementation.java = implFile.file + ";" + implFile.className;
+                    dagImplementation.put("java", implFile.file + ";" + implFile.className);
                     System.out.println("Rewrote JSON: " + node.implementation.java);
                 } else if (implFile.impl.equals("scala")) { // Scala
                     if (implFile.sbt != null) {
@@ -83,6 +91,7 @@ public class Install {
                     }
                     // Rewrite scala attribute.
                     node.implementation.scala = implFile.file + ";" + implFile.className;
+                    dagImplementation.put("scala", implFile.file + ";" + implFile.className);
                     System.out.println("Rewrote JSON: " + node.implementation.scala);
                 } else { // Clojure
                     if (implFile.lein != null) {
@@ -104,11 +113,13 @@ public class Install {
                     }
                     // Rewrite clojure attribute.
                     node.implementation.clojure = implFile.file + ";" + implFile.className;
+                    dagImplementation.put("clojure", implFile.file + ";" + implFile.className);
                     System.out.println("Rewrote JSON: " + node.implementation.clojure);
                 }
             }
 
-            Init.mapper.writeValue(new File(init.SIFT_ROOT, init.SIFT_JSON), init.sift);
+            //Init.mapper.writeValue(new File(init.SIFT_ROOT, init.SIFT_JSON), init.sift);
+            Install.saveSiftJSON(jsonObject, init);
         } catch (Exception ex) {
             System.err.println("Error running install: " + ex.toString());
             ex.printStackTrace();
@@ -125,7 +136,7 @@ public class Install {
             p = Runtime.getRuntime().exec(cmdarray, null, dir);
 
             BufferedReader in = new BufferedReader(
-                    new InputStreamReader(p.getInputStream()) );
+                    new InputStreamReader(p.getInputStream()));
             String inLine = "";
             while ((inLine = in.readLine()) != null) {
                 System.out.println(inLine);
@@ -196,7 +207,7 @@ public class Install {
     }
 
     private static String runBuildTool(String n, String impl, String toolName, String toolPath,
-                                 SiftJSON.Dag.Node.Implementation.ImplFile implFile, Init init) throws Exception {
+                                       SiftJSON.Dag.Node.Implementation.ImplFile implFile, Init init) throws Exception {
         //System.out.println("runBuildTool: " + toolName + " : " + toolPath + " : " + implFile.file + " : " + implFile.className);
         File toolFile = new File(init.SIFT_ROOT, toolPath);
         File toolOutputDir = new File(toolFile.getPath(), "target");
@@ -231,8 +242,8 @@ public class Install {
     }
 
     private static File compile(String n, String impl,
-                                     SiftJSON.Dag.Node.Implementation.ImplFile implFile, String implPath,
-                                     String computeJARPath, File parentFile, Init init) throws Exception {
+                                SiftJSON.Dag.Node.Implementation.ImplFile implFile, String implPath,
+                                String computeJARPath, File parentFile, Init init) throws Exception {
         File classesFile = new File(parentFile.getPath(), "classes/" + implFile.impl);
         //System.out.println(classesFile.getPath() + " exists: " + classesFile.exists() + " implPath=" + implPath);
         if (!classesFile.exists()) {
@@ -269,8 +280,8 @@ public class Install {
     }
 
     private static String createJAR(String n, String impl,
-                                      SiftJSON.Dag.Node.Implementation.ImplFile implFile,
-                                       File classesFile, Init init) throws Exception {
+                                    SiftJSON.Dag.Node.Implementation.ImplFile implFile,
+                                    File classesFile, Init init) throws Exception {
         List<String> args = new ArrayList<String>();
         args.add("jar");
         args.add("cvf");
@@ -300,5 +311,24 @@ public class Install {
             jarName = jarName.substring(1);
         }
         return jarName;
+    }
+
+
+    private static JSONObject getSiftJSON(Init init) throws Exception {
+
+        JSONParser parser = new JSONParser();
+
+        Object obj = parser.parse(new FileReader(new File(init.SIFT_ROOT, init.SIFT_JSON).getPath()));
+
+        JSONObject jsonObject = (JSONObject) obj;
+
+        return jsonObject;
+    }
+
+    private static void saveSiftJSON(JSONObject jsonObject, Init init) throws Exception {
+            FileWriter file = new FileWriter(new File(init.SIFT_ROOT, init.SIFT_JSON).getPath());
+            file.write(jsonObject.toJSONString());
+            file.flush();
+            file.close();
     }
 }
