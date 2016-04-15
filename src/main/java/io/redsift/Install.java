@@ -1,4 +1,4 @@
-package com.redsift;
+package io.redsift;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -129,11 +129,10 @@ public class Install {
         }
     }
 
-    private static String executeCommand(String[] cmdarray, File dir,
+    private static boolean executeCommand(String[] cmdarray, File dir,
                                          SiftJSON.Dag.Node.Implementation.ImplFile implFile) {
-        StringBuffer errOutput = new StringBuffer();
-
         Process p;
+        int exitCode = 1;
         try {
             p = Runtime.getRuntime().exec(cmdarray, null, dir);
 
@@ -149,34 +148,18 @@ public class Install {
                     new BufferedReader(new InputStreamReader(p.getErrorStream()));
             String line = "";
             while ((line = reader.readLine()) != null) {
-                errOutput.append(line + "\n");
+                System.out.println(line);
             }
             reader.close();
 
+            exitCode = p.waitFor();
         } catch (Exception e) {
             System.out.println("Exception executing command!" + cmdarray.toString());
             e.printStackTrace();
         }
-        String out = errOutput.toString();
 
-        // This is to avoid the "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8" message in stderr.
-        String ignoreStr = "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8\n";
-        if (out.equals(ignoreStr)) {
-            out = "";
-        }
-
-        if (implFile.lein != null) {
-            String ignoreStrLein = "Compiling ";
-            int lastIndex = out.lastIndexOf(ignoreStrLein);
-            if (lastIndex > 0) {
-                out = out.substring(lastIndex);
-            }
-            if (out.startsWith(ignoreStrLein) && out.split("\\n").length == 1) {
-                //System.out.println("Lein output: " + out);
-                out = "";
-            }
-        }
-        return out;
+        System.out.println("Process exited with code " + exitCode);
+        return exitCode == 0;
 
     }
 
@@ -221,9 +204,9 @@ public class Install {
             toolCmds = new String[]{"lein", "uberjar"};
         }
 
-        String err = executeCommand(toolCmds, toolFile, implFile);
-        if (err != null && err.length() > 0) {
-            throw new Exception("Error building with " + toolName + " " + n + " (" + impl + "): " + err);
+        boolean success = executeCommand(toolCmds, toolFile, implFile);
+        if (!success) {
+            throw new Exception("Error building with " + toolName + " " + n + " (" + impl + ")");
         }
 
         System.out.println(toolName + " build success");
@@ -271,10 +254,10 @@ public class Install {
             //System.out.println("cmds= " + Arrays.toString(cmds));
         }
 
-        String err = executeCommand(cmds, cmdDir, implFile);
+        boolean success = executeCommand(cmds, cmdDir, implFile);
 
-        if (err != null && err.length() > 0) {
-            throw new Exception("Error compiling Node " + n + " (" + impl + "): " + err);
+        if (!success) {
+            throw new Exception("Error compiling Node " + n + " (" + impl + ")");
         }
 
         System.out.println("Compiled node");
@@ -299,9 +282,9 @@ public class Install {
 
         String[] jarCmds = new String[]{"jar", "cvf", jarFile, classFile};
 
-        String err = executeCommand(jarCmds, classesFile, implFile);
-        if (err != null && err.length() > 0) {
-            throw new Exception("Error creating jar for Node " + n + " (" + impl + "): " + err);
+        boolean success = executeCommand(jarCmds, classesFile, implFile);
+        if (!success) {
+            throw new Exception("Error creating jar for Node " + n + " (" + impl + ")");
         }
 
         System.out.println("Created JAR");
@@ -337,7 +320,7 @@ public class Install {
     private static void installComputeJAR() {
         Process p;
         try {
-            p = Runtime.getRuntime().exec("mvn install:install-file -Dfile=/usr/bin/redsift/compute.jar -DgroupId=com.redsift -DartifactId=compute -Dversion=1.0 -Dpackaging=jar");
+            p = Runtime.getRuntime().exec("mvn install:install-file -Dfile=/usr/bin/redsift/compute.jar -DgroupId=io.redsift -DartifactId=compute -Dversion=1.0 -Dpackaging=jar");
 
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(p.getInputStream()));

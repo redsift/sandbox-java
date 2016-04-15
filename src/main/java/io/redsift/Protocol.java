@@ -1,4 +1,4 @@
-package com.redsift;
+package io.redsift;
 
 import java.util.HashMap;
 import java.util.Map;

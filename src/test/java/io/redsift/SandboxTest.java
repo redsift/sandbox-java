@@ -1,4 +1,4 @@
-package com.redsift;
+package io.redsift;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -7,13 +7,13 @@ import junit.framework.TestSuite;
 /**
  * Unit test for simple App.
  */
-public class Node1Test extends TestCase {
+public class SandboxTest extends TestCase {
     /**
      * Create the test case
      *
      * @param testName name of the test case
      */
-    public Node1Test(String testName) {
+    public SandboxTest(String testName) {
         super(testName);
     }
 
@@ -21,7 +21,7 @@ public class Node1Test extends TestCase {
      * @return the suite of tests being tested
      */
     public static Test suite() {
-        return new TestSuite(Node1Test.class);
+        return new TestSuite(SandboxTest.class);
     }
 
     /**

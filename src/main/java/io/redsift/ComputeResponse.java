@@ -1,4 +1,4 @@
-package com.redsift;
+package io.redsift;
 
 public class ComputeResponse {
     public String name;

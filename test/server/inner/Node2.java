@@ -2,8 +2,8 @@ package server.inner;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.redsift.ComputeRequest;
-import com.redsift.ComputeResponse;
+import io.redsift.ComputeRequest;
+import io.redsift.ComputeResponse;
 
 public class Node2 {
     public static List<ComputeResponse> compute(ComputeRequest req) throws Exception {

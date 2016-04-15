@@ -1,7 +1,7 @@
-package com.redsift;
+package io.redsift;
 
-import com.redsift.ComputeRequest;
-import com.redsift.ComputeResponse;
+import io.redsift.ComputeRequest;
+import io.redsift.ComputeResponse;
 
 public class MavenNode1 {
     public static ComputeResponse compute(ComputeRequest req) throws Exception {

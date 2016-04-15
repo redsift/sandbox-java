@@ -1,7 +1,7 @@
 package server;
 
-import com.redsift.ComputeRequest;
-import com.redsift.ComputeResponse;
+import io.redsift.ComputeRequest;
+import io.redsift.ComputeResponse;
 
 public class Node2 {
     public static ComputeResponse[] compute(ComputeRequest req) throws Exception {

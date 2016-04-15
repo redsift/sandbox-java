@@ -1,7 +1,7 @@
 package server;
 
-import com.redsift.ComputeRequest;
-import com.redsift.ComputeResponse;
+import io.redsift.ComputeRequest;
+import io.redsift.ComputeResponse;
 import java.nio.charset.StandardCharsets;
 
 public class Node1 {

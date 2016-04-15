@@ -1,4 +1,4 @@
-package com.redsift;
+package io.redsift;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

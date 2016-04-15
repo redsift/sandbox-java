@@ -22,7 +22,7 @@
         {
             "#": "Test Node Maven 1",
             "implementation": {
-                "java": "server/src/main/java/com/redsift/MavenNode1.java"
+                "java": "server/src/main/java/io/redsift/MavenNode1.java"
             }
         },
 		{

@@ -1,4 +1,4 @@
-package com.redsift;
+package io.redsift;
 
 import nanomsg.Nanomsg;
 import nanomsg.reqrep.RepSocket;
