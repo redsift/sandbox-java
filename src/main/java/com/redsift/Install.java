@@ -16,6 +16,8 @@ public class Install {
         try {
             System.out.println("Install: " + Arrays.toString(args));
 
+            Install.installComputeJAR();
+
             Init init = new Init(args);
             String computeJARPath = Init.computeJARPath();
             //System.out.println("computeJARPath=" + computeJARPath);
@@ -129,7 +131,7 @@ public class Install {
 
     private static String executeCommand(String[] cmdarray, File dir,
                                          SiftJSON.Dag.Node.Implementation.ImplFile implFile) {
-        StringBuffer output = new StringBuffer();
+        StringBuffer errOutput = new StringBuffer();
 
         Process p;
         try {
@@ -147,7 +149,7 @@ public class Install {
                     new BufferedReader(new InputStreamReader(p.getErrorStream()));
             String line = "";
             while ((line = reader.readLine()) != null) {
-                output.append(line + "\n");
+                errOutput.append(line + "\n");
             }
             reader.close();
 
@@ -155,7 +157,7 @@ public class Install {
             System.out.println("Exception executing command!" + cmdarray.toString());
             e.printStackTrace();
         }
-        String out = output.toString();
+        String out = errOutput.toString();
 
         // This is to avoid the "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8" message in stderr.
         String ignoreStr = "Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8\n";
@@ -330,5 +332,32 @@ public class Install {
         file.write(jsonObject.toJSONString());
         file.flush();
         file.close();
+    }
+
+    private static void installComputeJAR() {
+        Process p;
+        try {
+            p = Runtime.getRuntime().exec("mvn install:install-file -Dfile=/usr/bin/redsift/compute.jar -DgroupId=com.redsift -DartifactId=compute -Dversion=1.0 -Dpackaging=jar");
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(p.getInputStream()));
+            String inLine = "";
+            while ((inLine = in.readLine()) != null) {
+                System.out.println(inLine);
+            }
+            in.close();
+
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                System.err.println(line);
+            }
+            reader.close();
+
+        } catch (Exception e) {
+            System.out.println("Exception executing installComputeJAR command!");
+            e.printStackTrace();
+        }
     }
 }

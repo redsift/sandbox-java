@@ -24,15 +24,12 @@ WORKDIR /tmp/sandbox
 RUN update-ca-certificates -f
 
 # Run maven build
-RUN mvn package
-
-RUN cd /tmp/sandbox/target/classes && jar cvf compute.jar com/redsift/Compute*.class && cp compute.jar /usr/bin/redsift/compute.jar
-
-RUN cp /tmp/sandbox/target/sandbox-*-fat.jar /usr/bin/redsift/sandbox.jar
-
-RUN rm -rf /tmp/sandbox
-
-RUN mvn install:install-file -Dfile=/usr/bin/redsift/compute.jar -DgroupId=com.redsift -DartifactId=compute -Dversion=1.0 -Dpackaging=jar
+RUN mvn package && \
+    cd /tmp/sandbox/target/classes && \
+    jar cvf compute.jar com/redsift/Compute*.class && \
+    cp compute.jar /usr/bin/redsift/compute.jar && \
+    cp /tmp/sandbox/target/sandbox-*-fat.jar /usr/bin/redsift/sandbox.jar && \
+    rm -rf /tmp/sandbox
 
 WORKDIR /run/dagger/sift
 
