@@ -34,4 +34,6 @@ RUN rm -rf /tmp/sandbox
 
 RUN mvn install:install-file -Dfile=/usr/bin/redsift/compute.jar -DgroupId=com.redsift -DartifactId=compute -Dversion=1.0 -Dpackaging=jar
 
+WORKDIR /run/dagger/sift
+
 ENTRYPOINT ["/bin/bash"]
