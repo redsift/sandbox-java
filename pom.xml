@@ -42,9 +42,6 @@
         </plugins>
     </build>
     <properties>
-        <version.jnanomsg>0.4.4</version.jnanomsg>
-        <version.jackson>2.6.3</version.jackson>
-        <version.multiline-string>0.1.1</version.multiline-string>
     </properties>
     <repositories>
         <repository>
@@ -69,19 +66,19 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${version.jackson}</version>
+            <version>2.6.3</version>
         </dependency>
         <dependency>
             <groupId>jnanomsg</groupId>
             <artifactId>jnanomsg</artifactId>
-            <version>${version.jnanomsg}</version>
+            <version>0.4.4</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/external/jnanomsg-${version.jnanomsg}.jar</systemPath>
+            <systemPath>${project.basedir}/external/jnanomsg-0.4.4.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.adrianwalker</groupId>
             <artifactId>multiline-string</artifactId>
-            <version>${version.multiline-string}</version>
+            <version>0.1.1</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
