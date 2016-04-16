@@ -50,7 +50,7 @@
                         <configuration>
                             <file>${project.basedir}/external/jnanomsg-0.4.4.jar</file>
                             <repositoryLayout>default</repositoryLayout>
-                            <groupId>jnanomsg</groupId>
+                            <groupId>redsift</groupId>
                             <artifactId>jnanomsg</artifactId>
                             <version>0.4.4</version>
                             <packaging>jar</packaging>
@@ -92,7 +92,7 @@
             <version>2.6.3</version>
         </dependency>
         <dependency>
-            <groupId>jnanomsg</groupId>
+            <groupId>redsift</groupId>
             <artifactId>jnanomsg</artifactId>
             <version>0.4.4</version>
         </dependency>
