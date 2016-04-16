@@ -197,7 +197,7 @@ public class Install {
         File toolFile = new File(init.SIFT_ROOT, toolPath);
         File toolOutputDir = new File(toolFile.getPath(), "target");
 
-        String[] toolCmds = new String[]{"mvn", "package"};
+        String[] toolCmds = new String[]{"mvn", "clean", "install"};
         if (implFile.sbt != null) {
             toolCmds = new String[]{"sbt", "package", "--error"};
         } else if (implFile.lein != null) {
