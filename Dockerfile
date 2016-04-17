@@ -24,7 +24,7 @@ WORKDIR /tmp/sandbox
 RUN update-ca-certificates -f
 
 # Run maven build
-RUN mvn clean install && \
+RUN mvn clean && mvn install && \
     cd /tmp/sandbox/target/classes && \
     jar cvf compute.jar io/redsift/Compute*.class && \
     cp compute.jar /usr/bin/redsift/compute.jar && \
