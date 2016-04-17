@@ -197,7 +197,7 @@ public class Install {
         File toolFile = new File(init.SIFT_ROOT, toolPath);
         File toolOutputDir = new File(toolFile.getPath(), "target");
 
-        String[] toolCmds = new String[]{"mvn", "clean", "install"};
+        String[] toolCmds = new String[]{"mvn", "clean"};
         if (implFile.sbt != null) {
             toolCmds = new String[]{"sbt", "package", "--error"};
         } else if (implFile.lein != null) {
@@ -207,6 +207,14 @@ public class Install {
         boolean success = executeCommand(toolCmds, toolFile, implFile);
         if (!success) {
             throw new Exception("Error building with " + toolName + " " + n + " (" + impl + ")");
+        }
+
+        if (implFile.maven != null) {
+            String[] toolCmds1 = new String[]{"mvn", "install"};
+            boolean success1 = executeCommand(toolCmds1, toolFile, implFile);
+            if (!success1) {
+                throw new Exception("Error building with " + toolName + " " + n + " (" + impl + ")");
+            }
         }
 
         System.out.println(toolName + " build success");
