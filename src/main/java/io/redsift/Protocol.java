@@ -16,7 +16,8 @@ public class Protocol {
                 try {
                     data.value = Init.mapper.writeValueAsBytes(valObj);
                 } catch (Exception e) {
-                    throw new Exception("unsupported data type");
+                    e.printStackTrace();
+                    throw new Exception("unsupported data type: " + valObj.getClass().toString() + ". Exception: " + e);
                 }
             }
         }

@@ -52,8 +52,14 @@ class NodeThread extends Thread {
                 socket.send(Protocol.toEncodedMessage(ret, diff));
             }
         } catch (Exception e) {
-            System.out.println("Thread " + threadName + " interrupted." + e);
-            e.printStackTrace();
+            Throwable cause = e.getCause();
+            if (cause != null) {
+                System.out.println("Thread " + threadName + " interrupted." + cause);
+                cause.printStackTrace();
+            } else {
+                System.out.println("Thread " + threadName + " interrupted." + e);
+                e.printStackTrace();
+            }
         }
         System.out.println("Thread " + threadName + " exiting.");
     }

@@ -1,5 +1,8 @@
 package io.redsift;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(content= JsonInclude.Include.NON_NULL)
 public class ComputeResponse {
     public String name;
     public String key;
