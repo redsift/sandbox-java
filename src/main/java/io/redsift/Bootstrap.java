@@ -4,6 +4,8 @@ import nanomsg.Nanomsg;
 import nanomsg.reqrep.RepSocket;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -38,30 +40,40 @@ class NodeThread extends Thread {
 
         try {
             while (true) {
-                byte[] req = socket.recvBytes();
+                byte[] req = this.socket.recvBytes();
                 ComputeRequest computeReq = Protocol.fromEncodedMessage(req);
                 //System.out.println("Received " + computeReq.toString());
                 long start = System.nanoTime();
-                Object ret = compute.invoke(null, computeReq);
+                Object ret = this.compute.invoke(null, computeReq);
                 long end = System.nanoTime();
                 double t = (end - start) / Math.pow(10, 9);
                 double[] diff = new double[2];
                 diff[0] = Math.floor(t);
                 diff[1] = (t - diff[0]) * Math.pow(10, 9);
                 //System.out.println("diff=" + t + " " + diff[0] + " " + diff[1]);
-                socket.send(Protocol.toEncodedMessage(ret, diff));
+                this.socket.send(Protocol.toEncodedMessage(ret, diff));
             }
         } catch (Exception e) {
             Throwable cause = e.getCause();
-            if (cause != null) {
-                System.out.println("Thread " + threadName + " interrupted." + cause);
-                cause.printStackTrace();
-            } else {
-                System.out.println("Thread " + threadName + " interrupted." + e);
-                e.printStackTrace();
+            if (cause == null) {
+                cause = e;
+            }
+            StringWriter stackWriter = new StringWriter();
+            cause.printStackTrace(new PrintWriter(stackWriter));
+
+            System.out.println("Thread " + threadName + " interrupted." + cause);
+            cause.printStackTrace();
+            String message = cause.toString();
+            try {
+                byte[] errBytes = Protocol.toErrorBytes(message, stackWriter.toString());
+                this.socket.send(errBytes);
+            } catch (Exception e1) {
+                // do nothing
+                System.out.println("Error sending error, how meta! " + e1);
             }
         }
         System.out.println("Thread " + threadName + " exiting.");
+        this.socket.close();
     }
 
     public void start() {

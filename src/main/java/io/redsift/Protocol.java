@@ -51,10 +51,17 @@ public class Protocol {
         return Init.mapper.writeValueAsBytes(m);
     }
 
-    public static ComputeRequest fromEncodedMessage(byte[] bytes) throws Exception {
-        ComputeRequest computeReq = Init.mapper.readValue(bytes, ComputeRequest.class);
-        //System.out.println("fromEncodedMessage: " + computeReq.toString());
+    public static byte[] toErrorBytes(String message, String stack) throws Exception {
+        Map<String, Object> err = new HashMap<String, Object>();
+        err.put("message", message);
+        err.put("stack", stack);
+        Map<String, Object> m = new HashMap<String, Object>();
+        m.put("error", err);
 
-        return computeReq;
+        return Init.mapper.writeValueAsBytes(m);
+    }
+
+    public static ComputeRequest fromEncodedMessage(byte[] bytes) throws Exception {
+        return Init.mapper.readValue(bytes, ComputeRequest.class);
     }
 }
