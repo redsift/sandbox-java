@@ -26,7 +26,7 @@ RUN update-ca-certificates -f
 # Run maven build
 RUN mvn clean && mvn install && \
     cd /tmp/sandbox/target/classes && \
-    jar cvf compute.jar io/redsift/Compute*.class && \
+    jar cvf compute.jar io/redsift/Compute*.class io/jmap/*.class && \
     cp compute.jar /usr/bin/redsift/compute.jar && \
     cp /tmp/sandbox/target/sandbox-*-fat.jar /usr/bin/redsift/sandbox.jar && \
     rm -rf /tmp/sandbox
