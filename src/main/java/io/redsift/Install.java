@@ -26,7 +26,6 @@ public class Install {
             JSONArray dagNodes = (JSONArray) dagObject.get("nodes");
             for (String n : args) {
                 int i = Integer.parseInt(n);
-                System.out.println("");
                 //System.out.println("n: " + n + " i: " + i);
                 SiftJSON.Dag.Node node = init.sift.dag.nodes[i];
                 JSONObject dagNode = (JSONObject) dagNodes.get(i);

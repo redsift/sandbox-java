@@ -24,11 +24,11 @@ class NodeThread extends Thread {
         this.threadName = name;
         this.addr = addr;
         this.compute = compute;
-        System.out.println("Creating " + threadName);
+        //System.out.println("Creating " + threadName);
     }
 
     public void run() {
-        System.out.println("Running " + threadName);
+        //System.out.println("Running " + threadName);
         this.socket = new RepSocket();
         this.socket.setSocketOpt(Nanomsg.SocketOption.NN_RCVMAXSIZE, -1);
 
@@ -36,7 +36,7 @@ class NodeThread extends Thread {
         this.socket.setSocketOpt(Nanomsg.SocketOption.NN_SNDTIMEO, -1);
 
         this.socket.connect(this.addr);
-        System.out.println("Connected to " + this.addr);
+        //System.out.println("Connected to " + this.addr);
 
         try {
             while (true) {
@@ -77,7 +77,7 @@ class NodeThread extends Thread {
     }
 
     public void start() {
-        System.out.println("Starting " + threadName);
+        //System.out.println("Starting " + threadName);
         if (t == null) {
             t = new Thread(this, threadName);
             t.start();
@@ -91,7 +91,7 @@ public class Bootstrap {
     public static void main(String args[]) {
 
         try {
-            System.out.println("Bootstrap: " + Arrays.toString(args));
+            //System.out.println("Bootstrap: " + Arrays.toString(args));
 
             Init init = new Init(args);
 
@@ -102,7 +102,6 @@ public class Bootstrap {
 
             for (String n : args) {
                 int i = Integer.parseInt(n);
-                System.out.println("");
                 //System.out.println("n: " + n + " i: " + i);
                 SiftJSON.Dag.Node node = init.sift.dag.nodes[i];
 
@@ -157,7 +156,7 @@ public class Bootstrap {
             for (Thread thread : threads) {
                 thread.join();
                 // If any thread exits then something went wrong. Bail out.
-                System.out.println("Node thread exited!");
+                //System.out.println("Node thread exited!");
                 //System.exit(1);
             }
 
