@@ -16,30 +16,30 @@ dependencies:
       set -e
       # Build java 8
       docker build -t 8 -f Dockerfile .
-      
+
 test:
   override:
     - |
       set -e
       for JV in $JAVA_VERSIONS
       do
-        INIT=$(docker inspect -f "{{index .ContainerConfig.Labels \"io.redsift.dagger.init\" }}" $JV)
+        INIT=$(docker inspect -f "{{index .ContainerConfig.Labels \"io.redsift.sandbox.install\" }}" $JV)
         echo "Calling init = $INIT"
         docker run -v $PWD/test:/run/dagger/sift $JV $INIT 0 1 2 3
         ls -A $PWD/test/server/classes/java || true
         ls -A $PWD/test/server/inner/classes/java || true
-        RUN=$(docker inspect -f "{{index .ContainerConfig.Labels \"io.redsift.dagger.run\" }}" $JV)
+        RUN=$(docker inspect -f "{{index .ContainerConfig.Labels \"io.redsift.sandbox.run\" }}" $JV)
         echo "Calling run = $RUN"
         docker run -v $PWD/test:/run/dagger/sift -e DRY=true $JV $RUN 0 1 2 3
         sudo rm -Rf $PWD/test/server/classes $PWD/test/server/inner/classes || true
       done
-  
+
 deployment:
   production:
-    branch: master  
+    branch: master
     commands:
       - docker login -e $QUAY_EMAIL -u $QUAY_USER -p $QUAY_PASS quay.io
-      - | 
+      - |
         set -e
         for JV in $JAVA_VERSIONS
         do

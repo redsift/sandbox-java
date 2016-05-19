@@ -10,6 +10,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
 
 LABEL io.redsift.dagger.init="/usr/bin/redsift/install" io.redsift.dagger.run="/usr/bin/redsift/bootstrap"
+LABEL io.redsift.sandbox.install="/usr/bin/redsift/install" io.redsift.sandbox.run="/usr/bin/redsift/bootstrap"
 
 COPY root /
 
