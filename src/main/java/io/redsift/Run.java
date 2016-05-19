@@ -86,12 +86,12 @@ class NodeThread extends Thread {
 
 }
 
-public class Bootstrap {
+public class Run {
 
     public static void main(String args[]) {
 
         try {
-            //System.out.println("Bootstrap: " + Arrays.toString(args));
+            //System.out.println("Run: " + Arrays.toString(args));
 
             Init init = new Init(args);
 
@@ -164,7 +164,7 @@ public class Bootstrap {
                 //socket.close();
             }
         } catch (Exception ex) {
-            System.err.println("Error running bootstrap: " + ex.toString());
+            System.err.println("Error during run: " + ex.toString());
             ex.printStackTrace();
             System.exit(1);
         }

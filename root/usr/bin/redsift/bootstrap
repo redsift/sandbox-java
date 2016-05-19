@@ -1,3 +1,0 @@
-#!/bin/bash
-
-/usr/bin/java -cp /usr/bin/redsift/sandbox.jar io.redsift.Bootstrap $@

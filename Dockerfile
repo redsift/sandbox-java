@@ -9,8 +9,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
 
-LABEL io.redsift.dagger.init="/usr/bin/redsift/install" io.redsift.dagger.run="/usr/bin/redsift/bootstrap"
-LABEL io.redsift.sandbox.install="/usr/bin/redsift/install" io.redsift.sandbox.run="/usr/bin/redsift/bootstrap"
+LABEL io.redsift.sandbox.install="/usr/bin/redsift/install" io.redsift.sandbox.run="/usr/bin/redsift/run"
 
 COPY root /
 
@@ -32,6 +31,6 @@ RUN mvn clean && mvn install && \
     cp /tmp/sandbox/target/sandbox-*-fat.jar /usr/bin/redsift/sandbox.jar && \
     rm -rf /tmp/sandbox
 
-WORKDIR /run/dagger/sift
+WORKDIR /run/sandbox/sift
 
 ENTRYPOINT ["/bin/bash"]
