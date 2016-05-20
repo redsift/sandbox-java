@@ -25,12 +25,12 @@ test:
       do
         INIT=$(docker inspect -f "{{index .Config.Labels \"io.redsift.sandbox.install\" }}" $JV)
         echo "Calling init = $INIT"
-        docker run -v $PWD/test:/run/sandbox/sift $JV $INIT 0 1 2 3
+        docker run -u 7438 -v $PWD/test:/run/sandbox/sift $JV $INIT 0 1 2 3
         ls -A $PWD/test/server/classes/java || true
         ls -A $PWD/test/server/inner/classes/java || true
         RUN=$(docker inspect -f "{{index .Config.Labels \"io.redsift.sandbox.run\" }}" $JV)
         echo "Calling run = $RUN"
-        docker run -v $PWD/test:/run/sandbox/sift -e DRY=true $JV $RUN 0 1 2 3
+        docker run -u 7438 -v $PWD/test:/run/sandbox/sift -e DRY=true $JV $RUN 0 1 2 3
         sudo rm -Rf $PWD/test/server/classes $PWD/test/server/inner/classes || true
       done
 
@@ -43,7 +43,7 @@ deployment:
         set -e
         for JV in $JAVA_VERSIONS
         do
-          JAVA_VERSION=$(docker run -t --entrypoint=/usr/bin/java $JV -version 2>&1 | cut -s -d '"' -f2)
+          JAVA_VERSION=$(docker run -u 7438 -t --entrypoint=/usr/bin/java $JV -version 2>&1 | cut -s -d '"' -f2)
           VERSION_ARRAY=(${JAVA_VERSION//_/ })
           VERSION=v${VERSION_ARRAY[0]}
           MAJOR_NUMBER=(${VERSION//./ })
