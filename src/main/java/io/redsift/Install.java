@@ -280,7 +280,6 @@ public class Install {
         String classFile = implFile.className.replace(".", "/");
         classFile += ".class";
         String jarFile = classFile.replace(".class", ".jar");
-        String classFile1 = classFile.replace(".class", "*.class");
         //System.out.println("createJAR file = " + implFile.file);
         //System.out.println("createJAR classFile = " + classFile);
         //System.out.println("createJAR jarFile = " + jarFile);
@@ -288,7 +287,10 @@ public class Install {
         //System.out.println("createJAR classesdir = "+ classesFile);
 
         String[] jarCmds = new String[]{"jar", "cvf", jarFile, classFile};
-
+        if (implFile.impl.equals("scala")) {
+            String classFile1 = classFile.replace(".class", "$.class");
+            jarCmds = new String[]{"jar", "cvf", jarFile, classFile, classFile1};
+        }
         boolean success = executeCommand(jarCmds, classesFile, implFile);
         if (!success) {
             throw new Exception("Error creating jar for Node " + n + " (" + impl + ")");
