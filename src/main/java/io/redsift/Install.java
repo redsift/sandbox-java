@@ -221,10 +221,11 @@ public class Install {
         String jarName = Install.findJarFile(toolOutputDir, init);
 
         // Scala: trick to find the jar
+        // Clojure: trick to find the jar
         if (jarName == null) {
             File[] directoryListing = toolOutputDir.listFiles();
             for (File fileName : directoryListing) {
-                if (fileName.getPath().contains("/target/scala")) {
+                if (fileName.getPath().contains("/target/scala") || fileName.getPath().contains("/target/uberjar")) {
                     jarName = Install.findJarFile(fileName, init);
                 }
             }
