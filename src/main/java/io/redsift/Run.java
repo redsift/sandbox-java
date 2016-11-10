@@ -13,18 +13,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import clojure.java.api.Clojure;
+import clojure.lang.IFn;
+
 class NodeThread extends Thread {
     public RepSocket socket;
     private Thread t;
     private String threadName;
     private Method compute;
+    private IFn cljCompute;
     private String addr;
 
-    NodeThread(String name, String addr, Method compute) {
+    NodeThread(String name, String addr, Method compute, IFn cljCompute, ClassLoader classLoader) {
         this.threadName = name;
         this.addr = addr;
         this.compute = compute;
-        //System.out.println("Creating " + threadName);
+        this.cljCompute = cljCompute;
+        this.setContextClassLoader(classLoader);
     }
 
     public void run() {
@@ -44,7 +49,7 @@ class NodeThread extends Thread {
                 ComputeRequest computeReq = Protocol.fromEncodedMessage(req);
                 //System.out.println("Received " + computeReq.toString());
                 long start = System.nanoTime();
-                Object ret = this.compute.invoke(null, computeReq);
+                Object ret = (this.compute == null) ? this.cljCompute.invoke(computeReq) : this.compute.invoke(null, computeReq);
                 long end = System.nanoTime();
                 double t = (end - start) / Math.pow(10, 9);
                 double[] diff = new double[2];
@@ -126,17 +131,22 @@ public class Run {
                     jars = new URL[]{jarFile.toURI().toURL(), clojureJARURL};
                 }
 
-                ClassLoader classloader = new URLClassLoader(jars,
+                ClassLoader classLoader = new URLClassLoader(jars,
                         //ClassLoader.getSystemClassLoader().getParent()); NOTE: If this is used we'll end up with a mismatch below.
                         currentClassLoader);
 
-                Class nodeClass = classloader.loadClass(implFile.className);
-
                 Method compute = null;
+                IFn cljCompute = null;
 
                 if (implFile.impl.equals("clj")) {
-                    compute = nodeClass.getMethod("invokeStatic", Object.class);
+                    Thread.currentThread().setContextClassLoader(classLoader);
+                    IFn require = Clojure.var("clojure.core", "require");
+                    require.invoke(Clojure.read(implFile.className));
+
+                    cljCompute = Clojure.var(implFile.className, "compute");
+                    //compute = nodeClass.getMethod("invokeStatic", Object.class);
                 } else {
+                    Class nodeClass = classLoader.loadClass(implFile.className);
                     compute = nodeClass.getMethod("compute", ComputeRequest.class);
                 }
 
@@ -146,8 +156,7 @@ public class Run {
 
                 String addr = "ipc://" + init.IPC_ROOT + "/" + n + ".sock";
 
-                NodeThread nodeThread = new NodeThread(n, addr, compute);
-                nodeThread.setContextClassLoader(classloader);
+                NodeThread nodeThread = new NodeThread(n, addr, compute, cljCompute, classLoader);
                 threads.add(nodeThread);
                 sockets.add(nodeThread.socket);
                 nodeThread.start();

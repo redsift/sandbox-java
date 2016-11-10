@@ -95,9 +95,6 @@ class SiftJSON {
                             implFile.buildTool = true;
                         }
                     } else { // Clojure
-                        if (!implFile.className.endsWith("$compute")) {
-                            implFile.className += "$compute";
-                        }
                         if (implFile.file.contains("src/")) {
                             int lastIndex = implFile.file.lastIndexOf("src/");
                             String sbtFile = implFile.file.substring(0, lastIndex);
