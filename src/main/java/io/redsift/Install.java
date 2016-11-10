@@ -128,8 +128,7 @@ public class Install {
         }
     }
 
-    private static boolean executeCommand(String[] cmdarray, File dir,
-                                         SiftJSON.Dag.Node.Implementation.ImplFile implFile) {
+    private static boolean executeCommand(String[] cmdarray, File dir) {
         Process p;
         int exitCode = 1;
         try {
@@ -203,14 +202,14 @@ public class Install {
             toolCmds = new String[]{"lein", "uberjar"};
         }
 
-        boolean success = executeCommand(toolCmds, toolFile, implFile);
+        boolean success = executeCommand(toolCmds, toolFile);
         if (!success) {
             throw new Exception("Error building with " + toolName + " " + n + " (" + impl + ")");
         }
 
         if (implFile.maven != null) {
             String[] toolCmds1 = new String[]{"mvn", "install"};
-            boolean success1 = executeCommand(toolCmds1, toolFile, implFile);
+            boolean success1 = executeCommand(toolCmds1, toolFile);
             if (!success1) {
                 throw new Exception("Error building with " + toolName + " " + n + " (" + impl + ")");
             }
@@ -262,7 +261,7 @@ public class Install {
             //System.out.println("cmds= " + Arrays.toString(cmds));
         }
 
-        boolean success = executeCommand(cmds, cmdDir, implFile);
+        boolean success = executeCommand(cmds, cmdDir);
 
         if (!success) {
             throw new Exception("Error compiling Node " + n + " (" + impl + ")");
@@ -281,18 +280,35 @@ public class Install {
         String classFile = implFile.className.replace(".", "/");
         classFile += ".class";
         String jarFile = classFile.replace(".class", ".jar");
+        args.add(jarFile);
         //System.out.println("createJAR file = " + implFile.file);
         //System.out.println("createJAR classFile = " + classFile);
         //System.out.println("createJAR jarFile = " + jarFile);
         //System.out.println("createJAR className = " + implFile.className);
         //System.out.println("createJAR classesdir = "+ classesFile);
 
-        String[] jarCmds = new String[]{"jar", "cvf", jarFile, classFile};
         if (implFile.impl.equals("scala")) {
             String classFile1 = classFile.replace(".class", "$.class");
-            jarCmds = new String[]{"jar", "cvf", jarFile, classFile, classFile1};
+            args.add(classFile);
+            args.add(classFile1);
+        } else if (implFile.impl.equals("clj")) {
+            File cF = new File(classFile);
+            File pF = cF.getParentFile();
+            File fF = new File(classesFile.getPath(), pF.getPath());
+            File[] files = fF.listFiles();
+            for (File f : files) {
+                String fp = f.getPath();
+                fp = fp.replace(classesFile.getPath() + "/", "");
+                if (fp.endsWith(".class")) {
+                    args.add(fp);
+                }
+            }
+        } else { // java
+            args.add(classFile);
         }
-        boolean success = executeCommand(jarCmds, classesFile, implFile);
+
+        String[] jarCmds = (String[])args.toArray(new String[0]);
+        boolean success = executeCommand(jarCmds, classesFile);
         if (!success) {
             throw new Exception("Error creating jar for Node " + n + " (" + impl + ")");
         }
