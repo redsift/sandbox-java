@@ -56,13 +56,15 @@ class SiftJSON {
 
                     String[] strs = impl.split(";");
                     implFile.file = strs[0];
+
+                    String classFile = implFile.file.replace("/", ".");
+                    classFile = classFile.replace("." + implFile.impl, "");
+                    implFile.classFile = classFile;
+
                     if (strs.length == 2) {
                         implFile.className = strs[1];
                     } else {
-                        String className = impl.replace("/", ".");
-                        className = className.replace("." + implFile.impl, "");
-                        className = className.replace(";", "");
-                        implFile.className = className;
+                        implFile.className = implFile.classFile;
                     }
 
                     // Check for maven project
@@ -98,13 +100,13 @@ class SiftJSON {
                         if (implFile.file.contains("src/")) {
                             int lastIndex = implFile.file.lastIndexOf("src/");
                             String sbtFile = implFile.file.substring(0, lastIndex);
-                            String sbtClassName = implFile.file.substring(lastIndex + "src/".length());
-                            sbtClassName = sbtClassName.replace("/", ".");
-                            sbtClassName = sbtClassName.replace(".clj", "");
-                            sbtClassName = sbtClassName.replace(";", "");
+                            String sbtClassFile = implFile.file.substring(lastIndex + "src/".length());
+                            sbtClassFile = sbtClassFile.replace("/", ".");
+                            sbtClassFile = sbtClassFile.replace(".clj", "");
+                            sbtClassFile = sbtClassFile.replace(";", "");
                             // TODO: - vs _
 
-                            implFile.className = sbtClassName;
+                            implFile.classFile = sbtClassFile;
                             implFile.lein = new ImplFile.LeinTool();
                             implFile.lein.path = sbtFile;
                             implFile.buildTool = true;
@@ -118,6 +120,7 @@ class SiftJSON {
                     public String impl;
                     public String file;
                     public String className;
+                    public String classFile;
                     public Boolean buildTool = false;
                     public MavenTool maven = null;
                     public SbtTool sbt = null;

@@ -236,6 +236,7 @@ public class Install {
     private static File compile(String n, String impl,
                                 SiftJSON.Dag.Node.Implementation.ImplFile implFile, String implPath,
                                 String computeJARPath, File parentFile, Init init) throws Exception {
+        //System.out.println("parentFile = " + parentFile.getPath());
         File classesFile = new File(parentFile.getPath(), "classes/" + implFile.impl);
         //System.out.println(classesFile.getPath() + " exists: " + classesFile.exists() + " implPath=" + implPath);
         if (!classesFile.exists()) {
@@ -251,13 +252,15 @@ public class Install {
             // -Dclojure.compile.path=/Users/deepakp/workspace/containers/sandbox-clojure/test/classes clojure.lang.Compile server.node1
             String basePath = implFile.file;
             String className = implFile.className;
-            className = className.replace("$compute", "");
+            String classFile = implFile.classFile;
+            //System.out.println("className= " + className);
+            //System.out.println("classFile= " + classFile);
             basePath = basePath.replace(".clj", "");
-            basePath = basePath.replace(className.replace(".", "/"), "");
+            basePath = basePath.replace(classFile.replace(".", "/"), "");
             cmdDir = new File(init.SIFT_ROOT, basePath);
             cmds = new String[]{"java", "-cp", computeJARPath + ":" + cmdDir.getPath() + ":" + Init.clojureJARPath(),
                     "-Dclojure.compile.path=" + classesFile.getPath(), "clojure.lang.Compile", className};
-            //System.out.println("basePath= " + basePath);
+            //System.out.println("cmdDir= " + cmdDir);
             //System.out.println("cmds= " + Arrays.toString(cmds));
         }
 
