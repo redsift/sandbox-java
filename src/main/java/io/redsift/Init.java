@@ -104,7 +104,6 @@ class SiftJSON {
                             sbtClassFile = sbtClassFile.replace("/", ".");
                             sbtClassFile = sbtClassFile.replace(".clj", "");
                             sbtClassFile = sbtClassFile.replace(";", "");
-                            // TODO: - vs _
 
                             implFile.classFile = sbtClassFile;
                             implFile.lein = new ImplFile.LeinTool();

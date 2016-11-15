@@ -142,6 +142,7 @@ public class Run {
                     Thread.currentThread().setContextClassLoader(classLoader);
                     IFn require = Clojure.var("clojure.core", "require");
                     require.invoke(Clojure.read(implFile.className));
+                    require.invoke(Clojure.read("clojure.string"));
 
                     cljCompute = Clojure.var(implFile.className, "compute");
                     //compute = nodeClass.getMethod("invokeStatic", Object.class);
