@@ -125,10 +125,11 @@ public class Run {
 
                 File jarFile = new File(init.SIFT_ROOT, implFile.file);
                 URL[] jars = new URL[]{jarFile.toURI().toURL()};
+                // For now clojure JAR is inside the jnanomsg lib, so don't include it here
                 if (node.implementation.clojure != null) {
-                    File clojureJARFile = new File(Init.clojureJARPath());
-                    URL clojureJARURL = clojureJARFile.toURI().toURL();
-                    jars = new URL[]{jarFile.toURI().toURL(), clojureJARURL};
+                    //File clojureJARFile = new File(Init.clojureJARPath());
+                    //URL clojureJARURL = clojureJARFile.toURI().toURL();
+                    //jars = new URL[]{jarFile.toURI().toURL(), clojureJARURL};
                 }
 
                 ClassLoader classLoader = new URLClassLoader(jars,
@@ -141,7 +142,6 @@ public class Run {
                 if (implFile.impl.equals("clj")) {
                     Thread.currentThread().setContextClassLoader(classLoader);
                     IFn require = Clojure.var("clojure.core", "require");
-                    require.invoke(Clojure.read("clojure.string"));
                     require.invoke(Clojure.read(implFile.className));
 
                     cljCompute = Clojure.var(implFile.className, "compute");

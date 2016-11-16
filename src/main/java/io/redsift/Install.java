@@ -258,7 +258,10 @@ public class Install {
             basePath = basePath.replace(".clj", "");
             basePath = basePath.replace(classFile.replace(".", "/"), "");
             cmdDir = new File(init.SIFT_ROOT, basePath);
-            cmds = new String[]{"java", "-cp", computeJARPath + ":" + cmdDir.getPath() + ":" + Init.clojureJARPath(),
+
+            // When we fix jnanomsg lib (which currently packages clojure 1.8.0) this section with need to supply the
+            // clojure JAR path
+            cmds = new String[]{"java", "-cp", computeJARPath + ":" + cmdDir.getPath() + ":" + Init.selfJARPath(),
                     "-Dclojure.compile.path=" + classesFile.getPath(), "clojure.lang.Compile", className};
             //System.out.println("cmdDir= " + cmdDir);
             //System.out.println("cmds= " + Arrays.toString(cmds));
