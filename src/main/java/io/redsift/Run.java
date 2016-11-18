@@ -20,36 +20,51 @@ class NodeThread extends Thread {
     public RepSocket socket;
     private Thread t;
     private String threadName;
-    private Method compute;
-    private IFn cljCompute;
+    private String className;
     private String addr;
+    private ClassLoader classLoader;
+    private Boolean clojure;
 
-    NodeThread(String name, String addr, Method compute, IFn cljCompute, ClassLoader classLoader) {
+    NodeThread(String name, String addr, ClassLoader classLoader, String className, Boolean clojure) {
         this.threadName = name;
         this.addr = addr;
-        this.compute = compute;
-        this.cljCompute = cljCompute;
-        this.setContextClassLoader(classLoader);
+        this.classLoader = classLoader;
+        this.className = className;
+        this.clojure = clojure;
     }
 
     public void run() {
-        //System.out.println("Running " + threadName);
-        this.socket = new RepSocket();
-        this.socket.setSocketOpt(Nanomsg.SocketOption.NN_RCVMAXSIZE, -1);
-
-        this.socket.setSocketOpt(Nanomsg.SocketOption.NN_RCVTIMEO, -1);
-        this.socket.setSocketOpt(Nanomsg.SocketOption.NN_SNDTIMEO, -1);
-
-        this.socket.connect(this.addr);
-        //System.out.println("Connected to " + this.addr);
-
         try {
+            Method compute = null;
+            IFn cljCompute = null;
+
+            if (this.clojure) {
+                Thread.currentThread().setContextClassLoader(this.classLoader);
+                IFn require = Clojure.var("clojure.core", "require");
+                require.invoke(Clojure.read(this.className));
+
+                cljCompute = Clojure.var(this.className, "compute");
+            } else {
+                Class nodeClass = this.classLoader.loadClass(this.className);
+                compute = nodeClass.getMethod("compute", ComputeRequest.class);
+            }
+
+            //System.out.println("Running " + threadName);
+            this.socket = new RepSocket();
+            this.socket.setSocketOpt(Nanomsg.SocketOption.NN_RCVMAXSIZE, -1);
+
+            this.socket.setSocketOpt(Nanomsg.SocketOption.NN_RCVTIMEO, -1);
+            this.socket.setSocketOpt(Nanomsg.SocketOption.NN_SNDTIMEO, -1);
+
+            this.socket.connect(this.addr);
+            //System.out.println("Connected to " + this.addr);
+
             while (true) {
                 byte[] req = this.socket.recvBytes();
                 ComputeRequest computeReq = Protocol.fromEncodedMessage(req);
                 //System.out.println("Received " + computeReq.toString());
                 long start = System.nanoTime();
-                Object ret = (this.compute == null) ? this.cljCompute.invoke(computeReq) : this.compute.invoke(null, computeReq);
+                Object ret = (compute == null) ? cljCompute.invoke(computeReq) : compute.invoke(null, computeReq);
                 long end = System.nanoTime();
                 double t = (end - start) / Math.pow(10, 9);
                 double[] diff = new double[2];
@@ -126,30 +141,30 @@ public class Run {
                 File jarFile = new File(init.SIFT_ROOT, implFile.file);
                 URL[] jars = new URL[]{jarFile.toURI().toURL()};
                 // For now clojure JAR is inside the jnanomsg lib, so don't include it here
-                if (node.implementation.clojure != null) {
+                //if (node.implementation.clojure != null) {
                     //File clojureJARFile = new File(Init.clojureJARPath());
                     //URL clojureJARURL = clojureJARFile.toURI().toURL();
                     //jars = new URL[]{jarFile.toURI().toURL(), clojureJARURL};
-                }
+                //}
 
                 ClassLoader classLoader = new URLClassLoader(jars,
                         //ClassLoader.getSystemClassLoader().getParent()); NOTE: If this is used we'll end up with a mismatch below.
                         currentClassLoader);
 
-                Method compute = null;
-                IFn cljCompute = null;
+                //Method compute = null;
+                //IFn cljCompute = null;
 
-                if (implFile.impl.equals("clj")) {
-                    Thread.currentThread().setContextClassLoader(classLoader);
-                    IFn require = Clojure.var("clojure.core", "require");
-                    require.invoke(Clojure.read(implFile.className));
+                //if (implFile.impl.equals("clj")) {
+                    //Thread.currentThread().setContextClassLoader(classLoader);
+                    //IFn require = Clojure.var("clojure.core", "require");
+                    //require.invoke(Clojure.read(implFile.className));
 
-                    cljCompute = Clojure.var(implFile.className, "compute");
+                    //cljCompute = Clojure.var(implFile.className, "compute");
                     //compute = nodeClass.getMethod("invokeStatic", Object.class);
-                } else {
-                    Class nodeClass = classLoader.loadClass(implFile.className);
-                    compute = nodeClass.getMethod("compute", ComputeRequest.class);
-                }
+                //} else {
+                    //Class nodeClass = classLoader.loadClass(implFile.className);
+                    //compute = nodeClass.getMethod("compute", ComputeRequest.class);
+                //}
 
                 if (init.DRY) {
                     return;
@@ -157,7 +172,7 @@ public class Run {
 
                 String addr = "ipc://" + init.IPC_ROOT + "/" + n + ".sock";
 
-                NodeThread nodeThread = new NodeThread(n, addr, compute, cljCompute, classLoader);
+                NodeThread nodeThread = new NodeThread(n, addr, classLoader, implFile.className, implFile.impl.equals("clj"));
                 threads.add(nodeThread);
                 sockets.add(nodeThread.socket);
                 nodeThread.start();
