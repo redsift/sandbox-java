@@ -16,7 +16,7 @@ public class Install {
         try {
             System.out.println("Install: " + Arrays.toString(args));
 
-            Install.installComputeJAR();
+            //Install.installComputeJAR();
 
             Init init = new Init(args);
             String computeJARPath = Init.computeJARPath();
