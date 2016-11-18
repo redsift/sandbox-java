@@ -29,7 +29,6 @@ RUN mvn clean && mvn install && \
     jar cvf compute.jar io/redsift/Compute*.class io/jmap/*.class && \
     cp compute.jar /usr/bin/redsift/compute.jar && \
     cp /tmp/sandbox/target/sandbox-*-fat.jar /usr/bin/redsift/sandbox.jar && \
-    mvn install:install-file -Dfile=/usr/bin/redsift/compute.jar -DgroupId=io.redsift -DartifactId=compute -Dversion=1.0 -Dpackaging=jar && \
     rm -rf /tmp/sandbox
 
 WORKDIR /run/sandbox/sift
