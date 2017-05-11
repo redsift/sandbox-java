@@ -52,7 +52,7 @@
                             <repositoryLayout>default</repositoryLayout>
                             <groupId>redsift</groupId>
                             <artifactId>jnanomsg</artifactId>
-                            <version>0.4.4</version>
+                            <version>0.4.5</version>
                             <packaging>jar</packaging>
                             <generatePom>true</generatePom>
                         </configuration>
