@@ -48,7 +48,7 @@
                         <id>install-jnanomsg</id>
                         <phase>clean</phase>
                         <configuration>
-                            <file>${project.basedir}/external/jnanomsg-0.4.4.jar</file>
+                            <file>${project.basedir}/external/jnanomsg-0.4.5.jar</file>
                             <repositoryLayout>default</repositoryLayout>
                             <groupId>redsift</groupId>
                             <artifactId>jnanomsg</artifactId>
@@ -94,7 +94,7 @@
         <dependency>
             <groupId>redsift</groupId>
             <artifactId>jnanomsg</artifactId>
-            <version>0.4.4</version>
+            <version>0.4.5</version>
         </dependency>
         <dependency>
             <groupId>org.adrianwalker</groupId>
