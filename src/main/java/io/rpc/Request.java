@@ -10,6 +10,8 @@ import java.util.Map;
 @JsonInclude(content = JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Request {
+    private static ObjectMapper mapper = new ObjectMapper();
+
     public String method;
     public String requestUri;
     public Map<String, String[]> header;
