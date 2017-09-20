@@ -13,18 +13,21 @@ public class ComputeRequest {
     public InputData with;
     public String[] query;
     public LookupData[] lookup;
+    public GetData[] get;
 
     public ComputeRequest(@JsonProperty("in") InputData in, @JsonProperty("with") InputData with,
-                          @JsonProperty("query") String[] query, @JsonProperty("lookup") LookupData[] lookup) {
+                          @JsonProperty("query") String[] query, @JsonProperty("lookup") LookupData[] lookup,
+                          @JsonProperty("get") GetData[] get) {
         this.in = in;
         this.with = with;
         this.query = query;
         this.lookup = lookup;
+        this.get = get;
     }
 
     public String toString() {
         return "[in: " + this.in + ", " + "with: " + this.with + ", " + "query: " + Arrays.toString(this.query) + ", " +
-                "lookup: " + Arrays.toString(this.lookup) + "]";
+                "lookup: " + Arrays.toString(this.lookup) + ", " + "get: " + Arrays.toString(this.get) + "]";
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -54,6 +57,24 @@ public class ComputeRequest {
 
         public String toString() {
             return "[bucket: " + this.bucket + ", " + "data: " + this.data + "]";
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class GetData {
+        public String bucket;
+        public String key;
+        public Data[] data;
+
+        public GetData(@JsonProperty("bucket") String bucket, @JsonProperty("key") String key,
+                       @JsonProperty("data") Data[] data) {
+            this.bucket = bucket;
+            this.key = key;
+            this.data = data;
+        }
+
+        public String toString() {
+            return "[bucket: " + this.bucket + ", key: " + this.key + ", data: " + this.data + "]";
         }
     }
 
