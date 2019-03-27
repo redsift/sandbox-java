@@ -28,15 +28,7 @@ public class Test {
         "epoch": 0
       }
     ]
-  },
-  "lookup": [
-    {
-      "data": {
-        "key": "adks-lookup",
-        "value": "SGVsbG8="
-      }
-    }
-  ]
+  }
 }
  */
     @Multiline
