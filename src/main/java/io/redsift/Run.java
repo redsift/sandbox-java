@@ -167,7 +167,7 @@ public class Run {
                 //}
 
                 if (init.DRY) {
-                    return;
+                    continue;
                 }
 
                 String addr = "ipc://" + init.IPC_ROOT + "/" + n + ".sock";
