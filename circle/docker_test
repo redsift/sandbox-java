@@ -17,7 +17,7 @@ imageName=$JDKV-testing
 echo "Building testing image: $imageName"
 docker build -t $imageName -f Dockerfile.testing .
 
-TN="0 1 2 3"
+TN="0 1 2 3 4 5 6 7"
 
 INIT=$(docker inspect -f '{{index .Config.Labels "io.redsift.sandbox.install" }}' $imageName)
 echo "Calling init = $INIT"
