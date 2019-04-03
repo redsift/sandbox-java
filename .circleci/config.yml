@@ -1,0 +1,57 @@
+version: 2.1
+
+default:
+  environment: &envvars
+    CONTAINER_NAME: quay.io/redsift/sandbox-java
+    CIRCLE_REVERSE_DEPENDENCIES: sandbox-scala sandbox-clojure
+executors:
+  dockexec:
+    shell: /bin/bash
+    environment: *envvars
+    docker:
+      - image: cibuilds/docker:18.06.3-ce
+
+
+commands:
+  v_build:
+    parameters:
+      jv:
+        type: string
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: docker login -u $QUAY_USER -p $QUAY_PASS quay.io
+      - run: ./circle/docker_build << parameters.jv >>
+      - run: ./circle/gen_testing_dockerfile << parameters.jv >>
+      - run: ./circle/docker_test << parameters.jv >>
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - circle
+
+jobs:
+  build_default:
+    executor: dockexec
+    steps:
+      - v_build:
+          jv: "8"
+  
+  trigger-builds:
+    executor: dockexec
+    steps:
+      - attach_workspace:
+          at: /
+      - run: /circle/trigger_build
+
+workflows:
+  version: 2.1
+  build-and-deploy:
+    jobs:
+      - build_default
+      - trigger-builds:
+          requires:
+            - build_default
+          filters:
+            branches:
+              only:
+                - master

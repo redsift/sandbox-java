@@ -1,0 +1,28 @@
+#!/bin/bash
+set -eu
+
+JDKV=$1
+
+CIRCLE_BRANCH=${CIRCLE_BRANCH/\//-} # fix/sth => fix-sth
+tagName=(${CIRCLE_BRANCH/-/ }) # release-1 => release
+SUFFIX="-beta"
+if [ $tagName == "release" ]; then
+  SUFFIX=""
+fi
+imageName=$CONTAINER_NAME:v1.$JDKV$SUFFIX
+
+echo Building $imageName
+docker build --build-arg jdk_version=$JDKV -t $imageName .
+
+JV=$(docker run -u 7438:7438 -t --entrypoint=/usr/bin/java $imageName -version 2>&1 | cut -s -d '"' -f2)
+echo "Container reported version:${JV}"
+
+JV_TAG=$CONTAINER_NAME:v$JV$SUFFIX
+echo "Tagging as $JV_TAG"
+docker tag $imageName $JV_TAG
+
+
+if [[ "$tagName" == "release" ]]; then
+  echo "Tagging as $CONTAINER_NAME:latest"
+  docker tag $imageName $CONTAINER_NAME:latest
+fi

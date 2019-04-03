@@ -1,10 +1,12 @@
 FROM quay.io/redsift/sandbox:latest
 MAINTAINER Deepak Prabhakara email: deepak@redsift.io version: 1.1.101
 
+ARG jdk_version=8
+
 # Install JDK without things like fuse
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
-    apt-get install -y --no-install-recommends openjdk-8-jdk maven && \
+    apt-get install -y --no-install-recommends openjdk-${jdk_version}-jdk maven && \
     apt-get purge -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
