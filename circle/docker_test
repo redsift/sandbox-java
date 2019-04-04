@@ -21,8 +21,7 @@ TN="0 1 2 3 4 5 6 7"
 
 INIT=$(docker inspect -f '{{index .Config.Labels "io.redsift.sandbox.install" }}' $imageName)
 echo "Calling init = $INIT"
-CMD="$INIT $TN; ls -A server/classes/java || true; ls -A server/inner/classes/java || true"
-echo $CMD | docker run --rm -u 7438:7438 $imageName $INIT $TN
+docker run --rm -u 7438:7438 $imageName $INIT $TN
 
 RUN=$(docker inspect -f '{{index .Config.Labels "io.redsift.sandbox.run" }}' $imageName)
 echo "Calling run = $RUN"
