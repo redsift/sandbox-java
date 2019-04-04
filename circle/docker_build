@@ -17,7 +17,12 @@ docker build --build-arg jdk_version=$JDKV -t $imageName .
 JV=$(docker run -u 7438:7438 -t --entrypoint=/usr/bin/java $imageName -version 2>&1 | cut -s -d '"' -f2)
 echo "Container reported version:${JV}"
 
-JV_TAG=$CONTAINER_NAME:v$JV$SUFFIX
+JV_FULL_TAG=$CONTAINER_NAME:v$JV$SUFFIX
+echo "Tagging as $JV_FULL_TAG"
+docker tag $imageName $JV_FULL_TAG
+
+minor=(${JV/_/ }) # 1.8.0_172 => 1.8.0
+JV_TAG=$CONTAINER_NAME:v$minor$SUFFIX
 echo "Tagging as $JV_TAG"
 docker tag $imageName $JV_TAG
 
